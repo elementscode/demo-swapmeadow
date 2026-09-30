@@ -1,0 +1,141 @@
+import "./style.css";
+import { File, redirect, ValidationError } from "@elements/app";
+import { SiteHeader } from "#app/shared/templates/site-header";
+import { Inbox } from "#app/shared/services/conversations";
+import { ListingForm, CATEGORIES, CONDITIONS, MAX_PHOTOS, createListing } from "#app/shared/services/listings";
+
+type Errors = Partial<Record<keyof ListingForm | "form", string[]>>;
+
+interface Submit {
+  errors: Errors;
+  saving: boolean;
+}
+
+const previews = new WeakMap<File, string>();
+
+/** An object url per picked file, made once, so a repaint does not mint another. */
+function previewUrl(file: File): string {
+  let url = previews.get(file);
+
+  if (!url) {
+    url = URL.createObjectURL(new Blob([file.data as BlobPart], { type: file.contentType }));
+    previews.set(file, url);
+  }
+
+  return url;
+}
+
+function onRemovePhoto(form: ListingForm, file: File) {
+  form.photos = form.photos.filter((f) => f !== file);
+}
+
+function onSubmit(form: ListingForm, submit: Submit) {
+  submit.saving = true;
+
+  try {
+    let id = createListing(form);
+    redirect(`/listings/${id}`);
+  } catch (err: any) {
+    submit.errors = err instanceof ValidationError && err.errors ? err.errors : { form: [err.message] };
+    submit.saving = false;
+  }
+}
+
+<html lang="en" class="page-sell" (
+  neighborhoodName: string,
+  inbox: Inbox,
+  private form: ListingForm = { title: "", price: "", free: false, category: "", condition: "good", description: "", photos: [] },
+  private submit: Submit = { errors: {}, saving: false },
+)>
+  <head>
+    <title>Post a listing · swapmeadow</title>
+    <meta name="description" content="Sell or give away something to your neighbors.">
+  </head>
+  <body>
+    <div class="app">
+      <SiteHeader active="sell" {inbox} />
+
+      <main class="app-main page-shell is-form sell stack is-lg">
+        <div class="stack is-xs">
+          <h1>Post a listing</h1>
+          <p class="hint">Neighbors in {neighborhoodName} see it right away. Anyone with a matching saved search gets an email.</p>
+        </div>
+
+        <form class="stack is-lg" onsubmit={() => onSubmit(form, submit)}>
+          <p e:if={submit.errors.form} class="error" role="alert">{submit.errors.form?.[0]}</p>
+
+          <div class="field">
+            <label>Photos</label>
+            <label class={["photo-drop", submit.errors.photos && "is-error"]}>
+              <input type="file" multiple accept="image/png,image/jpeg,image/gif,image/webp" value={form.photos}>
+              <strong>{form.photos.length ? "Add more photos" : "Add photos"}</strong>
+              <span class="text-sm">Up to {MAX_PHOTOS}. The first one is the cover.</span>
+            </label>
+            <p e:if={submit.errors.photos} class="error">{submit.errors.photos?.[0]}</p>
+          </div>
+
+          <ul e:if={form.photos.length > 0} class="photo-previews">
+            <li e:for={file of form.photos} class="photo-preview">
+              <img src={previewUrl(file)} alt={file.name} width="104" height="104">
+              <span e:if={form.photos.indexOf(file) === 0} class="pill is-accent">Cover</span>
+              <button type="button" aria-label={`Remove ${file.name}`} onclick={() => onRemovePhoto(form, file)}>×</button>
+            </li>
+          </ul>
+
+          <div class="field">
+            <label for="title">Title</label>
+            <input id="title" value={form.title} maxlength={80} placeholder="Kids' bike, 16 inch"
+                   class={[submit.errors.title && "is-error"]} required>
+            <p e:if={submit.errors.title} class="error">{submit.errors.title?.[0]}</p>
+          </div>
+
+          <div class="field">
+            <label for="price">Price</label>
+            <div class="price-row row">
+              <div class="price-input">
+                <span>$</span>
+                <input id="price" value={form.price} inputmode="numeric" placeholder="25"
+                       disabled={form.free} class={[submit.errors.price && "is-error"]}>
+              </div>
+              <label class="price-free"><input type="checkbox" checked={form.free}> Free, give it away</label>
+            </div>
+            <p e:if={submit.errors.price} class="error">{submit.errors.price?.[0]}</p>
+          </div>
+
+          <div class="field">
+            <label for="category">Category</label>
+            <select id="category" value={form.category} class={[submit.errors.category && "is-error"]} required>
+              <option value="" disabled>Choose a category</option>
+              <option e:for={c of CATEGORIES} value={c.id}>{c.label}</option>
+            </select>
+            <p e:if={submit.errors.category} class="error">{submit.errors.category?.[0]}</p>
+          </div>
+
+          <fieldset class="stack is-sm">
+            <legend>Condition</legend>
+            <div class="condition-options">
+              <label e:for={c of CONDITIONS} class="condition-option">
+                <input type="radio" name="condition" value={c.id} group={form.condition}>
+                {c.label}
+              </label>
+            </div>
+            <p e:if={submit.errors.condition} class="error">{submit.errors.condition?.[0]}</p>
+          </fieldset>
+
+          <div class="field">
+            <label for="description">Description</label>
+            <textarea id="description" value={form.description} rows={5}
+                      placeholder="Size, age, any wear, and when it can be picked up."></textarea>
+          </div>
+
+          <div class="sell-actions row">
+            <a class="button is-ghost" href="/">Cancel</a>
+            <button type="submit" class="is-primary" disabled={submit.saving}>
+              {submit.saving ? "Posting…" : "Post listing"}
+            </button>
+          </div>
+        </form>
+      </main>
+    </div>
+  </body>
+</html>

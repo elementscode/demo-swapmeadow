@@ -1,0 +1,105 @@
+@import "#app/shared/styles/page.css";
+
+.selling {
+  padding-block: var(--space-8) var(--space-16);
+}
+
+.selling-head {
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.selling h1 {
+  font-size: var(--text-3xl);
+  letter-spacing: -0.03em;
+}
+
+.my-listings {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.my-listing {
+  display: grid;
+  grid-template-columns: 5rem minmax(0, 1fr) auto;
+  gap: var(--space-4);
+  align-items: center;
+  padding: var(--space-3) var(--space-4);
+}
+
+.my-listing + .my-listing {
+  border-top: 1px solid var(--rule);
+}
+
+.my-listing img {
+  width: 5rem;
+  height: 3.75rem;
+  border-radius: var(--radius-md);
+  object-fit: cover;
+  background: var(--bg-muted);
+}
+
+.my-listing.is-sold img {
+  filter: grayscale(0.85);
+  opacity: 0.6;
+}
+
+.my-listing-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.my-listing-text a {
+  overflow: hidden;
+  font-weight: var(--weight-semibold);
+  color: var(--ink);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  text-decoration: none;
+}
+
+.my-listing-text a:hover {
+  text-decoration: underline;
+}
+
+.my-listing-text span {
+  font-size: var(--text-sm);
+  color: var(--ink-soft);
+}
+
+.my-listing select {
+  width: auto;
+  height: 2rem;
+  font-size: var(--text-sm);
+}
+
+.selling-empty {
+  padding: var(--space-12) var(--space-6);
+  border: 1px dashed var(--rule);
+  border-radius: var(--radius-lg);
+  text-align: center;
+  color: var(--ink-soft);
+}
+
+@media (max-width: 30rem) {
+  .my-listing {
+    grid-template-columns: 4rem minmax(0, 1fr);
+  }
+
+  .my-listing img {
+    width: 4rem;
+    height: 3rem;
+  }
+
+  .my-listing select {
+    grid-column: 2;
+    justify-self: start;
+  }
+}

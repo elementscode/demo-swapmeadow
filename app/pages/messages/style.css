@@ -1,0 +1,102 @@
+@import "#app/shared/styles/page.css";
+
+.inbox {
+  padding-block: var(--space-8) var(--space-16);
+}
+
+.inbox h1 {
+  font-size: var(--text-3xl);
+  letter-spacing: -0.03em;
+}
+
+.inbox-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.inbox-list li + li {
+  border-top: 1px solid var(--rule);
+}
+
+.inbox-row {
+  display: grid;
+  grid-template-columns: 3.5rem minmax(0, 1fr) auto;
+  gap: var(--space-4);
+  align-items: center;
+  padding: var(--space-3) var(--space-4);
+  color: inherit;
+  text-decoration: none;
+}
+
+.inbox-row:hover {
+  background: var(--bg-soft);
+}
+
+.inbox-thumb {
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: var(--radius-md);
+  object-fit: cover;
+  background: var(--bg-muted);
+}
+
+.inbox-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.inbox-who {
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+}
+
+.inbox-listing {
+  overflow: hidden;
+  font-size: var(--text-xs);
+  color: var(--ink-soft);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.inbox-last {
+  overflow: hidden;
+  font-size: var(--text-sm);
+  color: var(--ink-soft);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.inbox-row.is-unread .inbox-last {
+  font-weight: var(--weight-semibold);
+  color: var(--ink);
+}
+
+.inbox-when {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: var(--space-2);
+  font-size: var(--text-xs);
+  color: var(--ink-soft);
+  white-space: nowrap;
+}
+
+.unread-dot {
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 999px;
+  background: var(--accent);
+}
+
+.inbox-empty {
+  padding: var(--space-12) var(--space-6);
+  border: 1px dashed var(--rule);
+  border-radius: var(--radius-lg);
+  text-align: center;
+  color: var(--ink-soft);
+}

@@ -1,0 +1,101 @@
+import "./style.css";
+import { redirect, ValidationError } from "@elements/app";
+import { signup, SignupForm, Neighborhood, MIN_PASSWORD } from "#app/shared/services/auth";
+import { Logo } from "#app/shared/templates/site-header";
+
+type Errors = Partial<Record<keyof SignupForm | "form", string[]>>;
+
+function onSubmit(form: SignupForm, state: { errors: Errors }) {
+  try {
+    signup(form);
+    state.errors = {};
+    redirect("/");
+  } catch (err: any) {
+    state.errors = err instanceof ValidationError && err.errors ? err.errors : { form: [err.message] };
+  }
+}
+
+<html lang="en" class="page-signup" (
+  neighborhoods: Neighborhood[],
+  private form: SignupForm = { name: "", email: "", password: "", neighborhoodId: "" },
+  private state: { errors: Errors } = { errors: {} },
+)>
+  <head>
+    <title>Join · swapmeadow</title>
+    <meta name="description" content="Join your neighborhood on swapmeadow.">
+  </head>
+  <body>
+    <div class="auth">
+      <section class="auth-story">
+        <a class="site-brand" href="/signin"><Logo /> swapmeadow</a>
+
+        <div class="auth-pitch stack is-md">
+          <h1>Pass it on, down the street.</h1>
+          <p class="lede">Everything you see is from your own neighborhood, so a listing is a short walk away.</p>
+        </div>
+
+        <p class="hint">Already a member? <a href="/signin">Sign in</a></p>
+      </section>
+
+      <main class="auth-panel">
+        <form class="auth-form stack is-md" onsubmit={() => onSubmit(form, state)}>
+          <h2>Join your neighborhood</h2>
+
+          <p e:if={state.errors.form} class="error" role="alert">{state.errors.form?.[0]}</p>
+
+          <div class="field">
+            <label for="name">Your name</label>
+            <input id="name" name="name" value={form.name} autocomplete="given-name" placeholder="Jess"
+                   class={[state.errors.name && "is-error"]} required>
+            <p e:if={state.errors.name} class="error">{state.errors.name?.[0]}</p>
+          </div>
+
+          <div class="field">
+            <label for="email">Email</label>
+            <input id="email"
+                   name="email"
+                   type="email"
+                   value={form.email}
+                   autocomplete="email"
+                   autocapitalize="none"
+                   spellcheck={false}
+                   placeholder="you@example.com"
+                   class={[state.errors.email && "is-error"]}
+                   required>
+            <p e:if={state.errors.email} class="error">{state.errors.email?.[0]}</p>
+          </div>
+
+          <div class="field">
+            <label for="password">Password</label>
+            <input id="password"
+                   name="password"
+                   type="password"
+                   value={form.password}
+                   autocomplete="new-password"
+                   minlength={MIN_PASSWORD}
+                   class={[state.errors.password && "is-error"]}
+                   required>
+            <p e:if={state.errors.password} class="error">{state.errors.password?.[0]}</p>
+            <p e:else class="hint">At least {MIN_PASSWORD} characters.</p>
+          </div>
+
+          <fieldset class="stack is-sm">
+            <legend>Neighborhood</legend>
+            <div class="hood-options">
+              <label e:for={n of neighborhoods} class="hood-option">
+                <input type="radio" name="neighborhood" value={n.id} group={form.neighborhoodId}>
+                <div>
+                  <strong>{n.name}</strong>
+                  <span>{n.area}</span>
+                </div>
+              </label>
+            </div>
+            <p e:if={state.errors.neighborhoodId} class="error">{state.errors.neighborhoodId?.[0]}</p>
+          </fieldset>
+
+          <button type="submit" class="is-primary is-block">Create account</button>
+        </form>
+      </main>
+    </div>
+  </body>
+</html>
