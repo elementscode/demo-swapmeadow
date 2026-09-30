@@ -1,0 +1,55 @@
+@import "#app/shared/styles/email.css";
+
+.email.saved-search-match .brand {
+  font-size: 13px;
+  font-weight: 600;
+  color: #2f6b3f;
+  letter-spacing: 0.02em;
+}
+
+.email.saved-search-match .listing {
+  display: block;
+  margin: 20px 0;
+  border: 1px solid #e3e6e1;
+  border-radius: 10px;
+  overflow: hidden;
+  color: #1c1f1b;
+  text-decoration: none;
+}
+
+.email.saved-search-match .listing img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.email.saved-search-match .listing span {
+  display: block;
+  padding: 0 16px;
+}
+
+.email.saved-search-match .price {
+  padding-top: 14px !important;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.email.saved-search-match .title {
+  font-size: 16px;
+}
+
+.email.saved-search-match .meta {
+  padding-bottom: 14px !important;
+  font-size: 13px;
+  color: #5d655b;
+}
+
+.email.saved-search-match .cta {
+  display: inline-block;
+  padding: 10px 18px;
+  border-radius: 8px;
+  background: #2f6b3f;
+  color: #ffffff;
+  font-weight: 600;
+  text-decoration: none;
+}

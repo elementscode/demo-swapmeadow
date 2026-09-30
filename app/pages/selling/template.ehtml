@@ -1,0 +1,62 @@
+import "./style.css";
+import { LiveView } from "@elements/app";
+import { SiteHeader } from "#app/shared/templates/site-header";
+import { Inbox } from "#app/shared/services/conversations";
+import { Listing, Status, formatPrice, timeAgo, setStatus } from "#app/shared/services/listings";
+
+function newestFirst(listings: LiveView<Listing>): Listing[] {
+  return listings.sort((a, b) => +b.createdAt - +a.createdAt);
+}
+
+function inquiryCount(inbox: Inbox, listingId: string): number {
+  return inbox.selling.filter((c) => c.listingId === listingId).length;
+}
+
+function plural(n: number, word: string): string {
+  return `${n} ${word}${n === 1 ? "" : "s"}`;
+}
+
+<MyListing (listing: Listing, view: LiveView<Listing>, inbox: Inbox)>
+  <li class={["my-listing", listing.status === "sold" && "is-sold"]}>
+    <img src={listing.coverPhoto ?? ""} alt="" width="80" height="60">
+    <div class="my-listing-text">
+      <a href={`/listings/${listing.id}`}>{listing.title}</a>
+      <span>{formatPrice(listing.price)} · posted {timeAgo(listing.createdAt)} · {plural(inquiryCount(inbox, listing.id), "conversation")}</span>
+    </div>
+    <select value={listing.status}
+            aria-label={`Status of ${listing.title}`}
+            onchange={(e) => setStatus(view, listing, (e.target as HTMLSelectElement).value as Status)}>
+      <option value="available">Available</option>
+      <option value="pending">Pending</option>
+      <option value="sold">Sold</option>
+    </select>
+  </li>
+</MyListing>
+
+<html lang="en" class="page-selling" (listings: LiveView<Listing>, inbox: Inbox)>
+  <head>
+    <title>Selling · swapmeadow</title>
+    <meta name="description" content="The things you have listed.">
+  </head>
+  <body>
+    <div class="app">
+      <SiteHeader active="selling" {inbox} />
+
+      <main class="app-main page-shell is-form selling stack is-lg">
+        <div class="selling-head row">
+          <h1>Your listings</h1>
+          <a class="button is-primary" href="/sell">Post a listing</a>
+        </div>
+
+        <ul e:if={listings.length > 0} class="my-listings">
+          <MyListing e:for={listing of newestFirst(listings)} {listing} view={listings} {inbox} />
+        </ul>
+
+        <div e:else class="selling-empty stack is-sm">
+          <strong>Nothing listed yet.</strong>
+          <p>Post something you no longer need. Free things go fast.</p>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>

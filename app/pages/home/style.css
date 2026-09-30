@@ -1,0 +1,115 @@
+@import "#app/shared/styles/page.css";
+
+.browse {
+  padding-block: var(--space-8) var(--space-16);
+}
+
+.browse-head {
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+}
+
+.browse-head h1 {
+  font-size: clamp(var(--text-3xl), 4vw, var(--text-4xl));
+  letter-spacing: -0.03em;
+}
+
+.browse-count {
+  color: var(--ink-soft);
+}
+
+.browse-search {
+  position: relative;
+}
+
+.browse-search input {
+  height: 3rem;
+  padding-inline-start: 2.75rem;
+  font-size: var(--text-md);
+}
+
+.browse-search svg {
+  position: absolute;
+  left: 0.95rem;
+  top: 50%;
+  translate: 0 -50%;
+  color: var(--ink-soft);
+  pointer-events: none;
+}
+
+.browse-filters {
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.chip-row {
+  gap: var(--space-2);
+}
+
+.chip {
+  height: 2rem;
+  padding-inline: var(--space-3);
+  border-radius: 999px;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+}
+
+.chip.is-active {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent-deep);
+}
+
+.browse-price {
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--ink-soft);
+}
+
+.browse-price select {
+  width: auto;
+  height: 2rem;
+  font-size: var(--text-sm);
+}
+
+.browse-price label {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  white-space: nowrap;
+}
+
+.browse-empty {
+  padding: var(--space-12) var(--space-6);
+  border: 1px dashed var(--rule-strong, var(--rule));
+  border-radius: var(--radius-lg);
+  text-align: center;
+  color: var(--ink-soft);
+}
+
+.save-search.is-done {
+  color: var(--accent-deep);
+}
+
+@media (max-width: 40rem) {
+  .browse {
+    padding-block: var(--space-5) var(--space-12);
+  }
+
+  .browse-head .button {
+    display: none;
+  }
+
+  .chip-row {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .chip {
+    flex: none;
+  }
+}

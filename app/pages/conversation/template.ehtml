@@ -1,0 +1,104 @@
+import "./style.css";
+import { LiveView } from "@elements/app";
+import { SiteHeader } from "#app/shared/templates/site-header";
+import { StatusPill } from "#app/shared/templates/listing-card";
+import { Inbox, Conversation, Message, markRead } from "#app/shared/services/conversations";
+import { Listing, formatPrice } from "#app/shared/services/listings";
+
+function ordered(messages: LiveView<Message>): Message[] {
+  return messages.sort((a, b) => +a.createdAt - +b.createdAt);
+}
+
+function clock(date: Date): string {
+  let sameDay = new Date().toDateString() === date.toDateString();
+  let time = date.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" });
+
+  return sameDay ? time : `${date.toLocaleDateString("en-US", { month: "short", day: "numeric" })}, ${time}`;
+}
+
+function onSend(messages: LiveView<Message>, me: string, myName: string, draft: { body: string }) {
+  let body = draft.body.trim();
+
+  if (!body) {
+    return;
+  }
+
+  messages.insert(
+    { senderId: me, senderName: myName, body, createdAt: new Date() },
+    () => draft.body = "",
+  );
+}
+
+/** A message arriving while the thread is open is a message read. */
+function onBubble(el: Element, message: Message, me: string, conversationId: string) {
+  el.scrollIntoView({ block: "end" });
+
+  if (message.senderId !== me && Date.now() - +message.createdAt < 60_000) {
+    markRead(conversationId);
+  }
+}
+
+function other(c: Conversation, me: string): string {
+  return c.buyerId === me ? c.sellerName : c.buyerName;
+}
+
+<ThreadHead (conversation: Conversation, listing: LiveView<Listing>, me: string)>
+  <div class="thread-head">
+    <div class="page-shell is-form thread-head-inner row">
+      <a class="thread-back" href="/messages" aria-label="Back to messages">←</a>
+      <img src={conversation.listingCover ?? ""} alt="" width="48" height="48">
+      <div class="thread-head-text">
+        <a href={`/listings/${conversation.listingId}`}>{conversation.listingTitle}</a>
+        <span class="thread-head-meta row">
+          {other(conversation, me)}
+          <span e:for={l of listing} class="row gap-1">
+            · {formatPrice(l.price)}
+            <StatusPill status={l.status} />
+          </span>
+        </span>
+      </div>
+    </div>
+  </div>
+</ThreadHead>
+
+<html lang="en" class="page-conversation" (
+  me: string,
+  myName: string,
+  conversation: Conversation,
+  listing: LiveView<Listing>,
+  messages: LiveView<Message>,
+  inbox: Inbox,
+  private draft: { body: string } = { body: "" },
+)>
+  <head>
+    <title>{other(conversation, me)} · {conversation.listingTitle} · swapmeadow</title>
+    <meta name="description" content="A conversation on swapmeadow.">
+  </head>
+  <body>
+    <div class="app is-fixed">
+      <SiteHeader active="messages" {inbox} />
+
+      <main class="app-main thread">
+        <ThreadHead {conversation} {listing} {me} />
+
+        <div class="thread-feed">
+          <ol class="page-shell is-form bubbles" aria-live="polite">
+            <li e:for={m of ordered(messages)}
+                class={["bubble", m.senderId === me && "is-mine"]}
+                oninsert={(e) => onBubble(e.target, m, me, conversation.id)}>
+              <p>{m.body}</p>
+              <time>{clock(m.createdAt)}</time>
+            </li>
+          </ol>
+        </div>
+
+        <div class="thread-compose">
+          <form class="page-shell is-form row" onsubmit={() => onSend(messages, me, myName, draft)}>
+            <input value={draft.body} placeholder={`Message ${other(conversation, me)}`} aria-label="Message" autocomplete="off" required>
+            <button type="submit" class="is-primary">Send</button>
+          </form>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>

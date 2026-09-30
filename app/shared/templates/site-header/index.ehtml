@@ -1,0 +1,47 @@
+import "./style.css";
+import { session, redirect } from "@elements/app";
+import { Inbox, unreadCount } from "#app/shared/services/conversations";
+import { signout } from "#app/shared/services/auth";
+
+function onSignout() {
+  signout();
+  redirect("/signin");
+}
+
+<Logo>
+  <svg width="26" height="26" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+    <rect width="32" height="32" rx="9" fill="currentColor"/>
+    <path d="M16 25V14" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/>
+    <path d="M16 16c0-4.4 3-7.5 8-7.5 0 4.6-3.2 7.5-8 7.5Z" fill="#fff"/>
+    <path d="M16 19c0-3.6-2.5-6-6.5-6 0 3.7 2.6 6 6.5 6Z" fill="#fff" opacity=".8"/>
+  </svg>
+</Logo>
+
+<SiteHeader (active: string, inbox: Inbox)>
+  <header class="site-header">
+    <div class="page-shell site-header-inner row">
+      <div class="row gap-3">
+        <a class="site-brand row" href="/">
+          <Logo />
+          swapmeadow
+        </a>
+        <span class="site-hood">{session.get("neighborhoodName")}</span>
+      </div>
+
+      <nav class="site-nav row" aria-label="Main">
+        <a href="/" class={[active === "browse" && "is-active"]}>Browse</a>
+        <a href="/saved" class={[active === "saved" && "is-active"]}>Saved</a>
+        <a href="/messages" class={[active === "messages" && "is-active"]}>
+          Messages
+          <span e:if={unreadCount(inbox, session.get("userId") ?? "") > 0} class="site-badge">
+            {unreadCount(inbox, session.get("userId") ?? "")}
+          </span>
+        </a>
+        <a href="/selling" class={[active === "selling" && "is-active"]}>Selling</a>
+        <a class="button is-primary is-sm" href="/sell">Post</a>
+      </nav>
+
+      <button class="is-ghost is-sm site-signout" onclick={() => onSignout()}>Sign out</button>
+    </div>
+  </header>
+</SiteHeader>

@@ -1,0 +1,39 @@
+import "./style.css";
+import { formatPrice, categoryLabel } from "#app/shared/services/listings";
+
+export interface MatchedListing {
+  id: string;
+  title: string;
+  price: number;
+  category: string;
+  sellerName: string;
+  coverPhoto: string | null;
+}
+
+/**
+ * Sent when a new listing matches one of a neighbor's saved searches.
+ *
+ * @email
+ */
+<html (name: string, neighborhood: string, searches: string[], listing: MatchedListing)>
+  <body class="email saved-search-match">
+    <div class="email-wrap">
+      <p class="brand">swapmeadow · {neighborhood}</p>
+      <h1>New in {neighborhood}: {listing.title}</h1>
+      <p>Hi {name}, a new listing matches your saved search <strong>{searches.join(", ")}</strong>.</p>
+
+      <a class="listing" href={`/listings/${listing.id}`}>
+        <img e:if={listing.coverPhoto} src={listing.coverPhoto!} alt={listing.title} width="520">
+        <span class="price">{formatPrice(listing.price)}</span>
+        <span class="title">{listing.title}</span>
+        <span class="meta">{categoryLabel(listing.category)} · from {listing.sellerName}</span>
+      </a>
+
+      <p><a class="cta" href={`/listings/${listing.id}`}>See the listing</a></p>
+
+      <div class="email-footer">
+        <p>You get this because you saved a search on swapmeadow. <a href="/saved">Manage saved searches</a></p>
+      </div>
+    </div>
+  </body>
+</html>

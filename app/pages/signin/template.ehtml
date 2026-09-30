@@ -1,0 +1,101 @@
+import "./style.css";
+import { redirect } from "@elements/app";
+import { signin } from "#app/shared/services/auth";
+import { Logo } from "#app/shared/templates/site-header";
+
+export interface DemoLogin {
+  name: string;
+  email: string;
+  neighborhood: string;
+}
+
+export const DEMO_PASSWORD = "meadowlark";
+
+interface SigninForm {
+  email: string;
+  password: string;
+  error: string;
+}
+
+function onSubmit(form: SigninForm) {
+  try {
+    signin(form.email, form.password);
+    form.error = "";
+    redirect("/");
+  } catch (err: any) {
+    form.error = err.message;
+  }
+}
+
+function onPickDemo(form: SigninForm, demo: DemoLogin) {
+  form.email = demo.email;
+  form.password = DEMO_PASSWORD;
+  onSubmit(form);
+}
+
+<html lang="en" class="page-signin" (
+  demos: DemoLogin[],
+  private form: SigninForm = { email: "", password: "", error: "" },
+)>
+  <head>
+    <title>Sign in · swapmeadow</title>
+    <meta name="description" content="Buy, sell and give away things with your neighbors.">
+  </head>
+  <body>
+    <div class="auth">
+      <section class="auth-story">
+        <a class="site-brand" href="/signin"><Logo /> swapmeadow</a>
+
+        <div class="auth-pitch stack is-md">
+          <h1>Your neighborhood's swap meet.</h1>
+          <p class="lede">Buy, sell and give away things with the people on your street. Pick up this afternoon.</p>
+        </div>
+
+        <div e:if={demos.length > 0} class="stack is-sm">
+          <p class="demo-note">Seeded neighbors. Click one to sign in, password <code>{DEMO_PASSWORD}</code>.</p>
+          <div class="demo-logins">
+            <button e:for={demo of demos} type="button" class="demo-login" onclick={() => onPickDemo(form, demo)}>
+              <strong>{demo.name}</strong>
+              <span>{demo.neighborhood} · {demo.email}</span>
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <main class="auth-panel">
+        <form class="auth-form stack is-md" onsubmit={() => onSubmit(form)}>
+          <h2>Sign in</h2>
+
+          <p e:if={form.error} class="error" role="alert">{form.error}</p>
+
+          <div class="field">
+            <label for="email">Email</label>
+            <input id="email"
+                   name="email"
+                   type="email"
+                   value={form.email}
+                   autocomplete="email"
+                   autocapitalize="none"
+                   spellcheck={false}
+                   placeholder="you@example.com"
+                   required>
+          </div>
+
+          <div class="field">
+            <label for="password">Password</label>
+            <input id="password"
+                   name="password"
+                   type="password"
+                   value={form.password}
+                   autocomplete="current-password"
+                   required>
+          </div>
+
+          <button type="submit" class="is-primary is-block">Sign in</button>
+
+          <p class="hint">New here? <a href="/signup">Join your neighborhood</a></p>
+        </form>
+      </main>
+    </div>
+  </body>
+</html>

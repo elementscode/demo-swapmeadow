@@ -1,0 +1,54 @@
+import "./style.css";
+import { SiteHeader } from "#app/shared/templates/site-header";
+import { Inbox, Conversation, inboxRows, isUnread } from "#app/shared/services/conversations";
+import { timeAgo } from "#app/shared/services/listings";
+
+function otherName(c: Conversation, me: string): string {
+  return c.buyerId === me ? c.sellerName : c.buyerName;
+}
+
+<InboxRow (c: Conversation, me: string)>
+  <li>
+    <a class={["inbox-row", isUnread(c, me) && "is-unread"]} href={`/messages/${c.id}`}>
+      <img class="inbox-thumb" src={c.listingCover ?? ""} alt="" width="56" height="56">
+      <div class="inbox-text">
+        <span class="inbox-who row">
+          <strong>{otherName(c, me)}</strong>
+          <span class={["pill", c.sellerId === me && "is-accent"]}>{c.sellerId === me ? "Selling" : "Buying"}</span>
+        </span>
+        <span class="inbox-listing">{c.listingTitle}</span>
+        <span class="inbox-last">{c.lastSenderId === me ? "You: " : ""}{c.lastMessageBody}</span>
+      </div>
+      <span class="inbox-when">
+        {timeAgo(c.lastMessageAt)}
+        <span e:if={isUnread(c, me)} class="unread-dot" aria-label="Unread"></span>
+      </span>
+    </a>
+  </li>
+</InboxRow>
+
+<html lang="en" class="page-messages" (me: string, inbox: Inbox)>
+  <head>
+    <title>Messages · swapmeadow</title>
+    <meta name="description" content="Your conversations with neighbors.">
+  </head>
+  <body>
+    <div class="app">
+      <SiteHeader active="messages" {inbox} />
+
+      <main class="app-main page-shell is-form inbox stack is-lg">
+        <h1>Messages</h1>
+
+        <ul e:if={inboxRows(inbox).length > 0} class="inbox-list">
+          <InboxRow e:for={c of inboxRows(inbox)} {c} {me} />
+        </ul>
+
+        <div e:else class="inbox-empty stack is-sm">
+          <strong>No conversations yet.</strong>
+          <p>Message a seller from any listing and the conversation shows up here.</p>
+          <p><a class="button" href="/">Browse listings</a></p>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>

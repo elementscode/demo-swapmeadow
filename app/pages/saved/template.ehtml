@@ -1,0 +1,96 @@
+import "./style.css";
+import { LiveView } from "@elements/app";
+import { SiteHeader } from "#app/shared/templates/site-header";
+import { ListingCard } from "#app/shared/templates/listing-card";
+import { Inbox } from "#app/shared/services/conversations";
+import { Listing, describeFilter, timeAgo } from "#app/shared/services/listings";
+import { SavedListing, SavedSearch } from "#app/shared/services/saved";
+
+function savedRows(listings: LiveView<Listing>, saved: LiveView<SavedListing>): Listing[] {
+  let when = new Map(saved.map((s) => [s.listingId, +s.createdAt]));
+
+  return listings
+    .filter((l) => when.has(l.id))
+    .sort((a, b) => when.get(b.id)! - when.get(a.id)!);
+}
+
+/** The browse url that shows a saved search's matches. */
+export function searchUrl(s: SavedSearch): string {
+  let params = new URLSearchParams();
+
+  if (s.query) {
+    params.set("q", s.query);
+  }
+
+  if (s.category) {
+    params.set("category", s.category);
+  }
+
+  if (s.freeOnly) {
+    params.set("price", "free");
+  } else if (s.maxPrice !== null) {
+    params.set("price", String(s.maxPrice));
+  }
+
+  let qs = params.toString();
+
+  return qs ? `/?${qs}` : "/";
+}
+
+<html lang="en" class="page-saved" (
+  me: string,
+  listings: LiveView<Listing>,
+  saved: LiveView<SavedListing>,
+  searches: LiveView<SavedSearch>,
+  inbox: Inbox,
+)>
+  <head>
+    <title>Saved · swapmeadow</title>
+    <meta name="description" content="Listings and searches you saved.">
+  </head>
+  <body>
+    <div class="app">
+      <SiteHeader active="saved" {inbox} />
+
+      <main class="app-main page-shell saved stack is-2xl">
+        <h1>Saved</h1>
+
+        <section class="stack is-md">
+          <div class="stack is-xs">
+            <h2>Saved searches</h2>
+            <p class="hint">We email you when a neighbor posts something that matches.</p>
+          </div>
+
+          <ul e:if={searches.length > 0} class="search-list">
+            <li e:for={s of searches.sort((a, b) => +b.createdAt - +a.createdAt)} class="row">
+              <div class="search-what">
+                <strong>{describeFilter(s)}</strong>
+                <span>{s.lastNotifiedAt ? `Last match emailed ${timeAgo(s.lastNotifiedAt)}` : "No new matches emailed yet"}</span>
+              </div>
+              <div class="cluster is-sm">
+                <a class="button is-sm" href={searchUrl(s)}>See matches</a>
+                <button type="button" class="is-ghost is-sm" onclick={() => searches.delete(s)}>Remove</button>
+              </div>
+            </li>
+          </ul>
+
+          <div e:else class="saved-empty">
+            Search or filter on the <a href="/">browse page</a>, then choose "Save search".
+          </div>
+        </section>
+
+        <section class="stack is-md">
+          <h2>Saved listings</h2>
+
+          <ul e:if={savedRows(listings, saved).length > 0} class="listing-grid">
+            <ListingCard e:for={listing of savedRows(listings, saved)} {listing} {saved} {me} />
+          </ul>
+
+          <div e:else class="saved-empty">
+            Tap the heart on any listing to keep it here.
+          </div>
+        </section>
+      </main>
+    </div>
+  </body>
+</html>

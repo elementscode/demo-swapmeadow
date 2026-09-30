@@ -1,0 +1,159 @@
+import "./style.css";
+import { LiveView } from "@elements/app";
+import { SiteHeader } from "#app/shared/templates/site-header";
+import { ListingCard } from "#app/shared/templates/listing-card";
+import { Inbox } from "#app/shared/services/conversations";
+import { Listing, Category, SearchFilter, CATEGORIES, matchesFilter, isFilterEmpty } from "#app/shared/services/listings";
+import { SavedListing, SavedSearch } from "#app/shared/services/saved";
+
+export interface BrowseState {
+  query: string;
+  category: Category | "";
+  price: "any" | "free" | "25" | "100" | "250";
+  showSold: boolean;
+}
+
+export const PRICE_OPTIONS = [
+  { value: "any", label: "Any price" },
+  { value: "free", label: "Free" },
+  { value: "25", label: "Under $25" },
+  { value: "100", label: "Under $100" },
+  { value: "250", label: "Under $250" },
+];
+
+function toFilter(state: BrowseState): SearchFilter {
+  return {
+    query: state.query.trim(),
+    category: state.category || null,
+    maxPrice: state.price === "any" || state.price === "free" ? null : Number(state.price),
+    freeOnly: state.price === "free",
+  };
+}
+
+function visible(listings: LiveView<Listing>, state: BrowseState): Listing[] {
+  let filter = toFilter(state);
+
+  // Sold rows sink to the bottom rather than vanish, so a neighbor who was
+  // watching one sees it change instead of disappear.
+  return listings
+    .filter((l) => (state.showSold || l.status !== "sold") && matchesFilter(l, filter))
+    .sort((a, b) => Number(a.status === "sold") - Number(b.status === "sold") || +b.createdAt - +a.createdAt);
+}
+
+function sameFilter(s: SavedSearch, f: SearchFilter): boolean {
+  return s.query.toLowerCase() === f.query.toLowerCase()
+    && (s.category ?? null) === f.category
+    && (s.maxPrice ?? null) === f.maxPrice
+    && s.freeOnly === f.freeOnly;
+}
+
+function isSearchSaved(searches: LiveView<SavedSearch>, state: BrowseState): boolean {
+  let filter = toFilter(state);
+  return searches.some((s) => sameFilter(s, filter));
+}
+
+function onSaveSearch(searches: LiveView<SavedSearch>, state: BrowseState, me: string, neighborhoodId: string) {
+  let filter = toFilter(state);
+
+  if (isFilterEmpty(filter) || searches.some((s) => sameFilter(s, filter))) {
+    return;
+  }
+
+  searches.insert({
+    userId: me,
+    neighborhoodId,
+    ...filter,
+    createdAt: new Date(),
+    lastNotifiedAt: null,
+  });
+}
+
+function onClear(state: BrowseState) {
+  state.query = "";
+  state.category = "";
+  state.price = "any";
+}
+
+function forSaleCount(listings: LiveView<Listing>): number {
+  return listings.filter((l) => l.status !== "sold").length;
+}
+
+<html lang="en" class="page-home" (
+  me: string,
+  neighborhoodId: string,
+  neighborhoodName: string,
+  listings: LiveView<Listing>,
+  saved: LiveView<SavedListing>,
+  searches: LiveView<SavedSearch>,
+  inbox: Inbox,
+  state: BrowseState,
+)>
+  <head>
+    <title>{neighborhoodName} · swapmeadow</title>
+    <meta name="description" content="Things for sale and free in your neighborhood.">
+  </head>
+  <body>
+    <div class="app">
+      <SiteHeader active="browse" {inbox} />
+
+      <main class="app-main page-shell browse stack is-lg">
+        <div class="browse-head row">
+          <div class="stack is-xs">
+            <h1>{neighborhoodName}</h1>
+            <p class="browse-count">{forSaleCount(listings)} things for sale or free, from your neighbors</p>
+          </div>
+          <a class="button is-primary" href="/sell">Post a listing</a>
+        </div>
+
+        <div class="stack is-md">
+          <div class="browse-search">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+              <circle cx="11" cy="11" r="7"/>
+              <path d="m20 20-3.5-3.5"/>
+            </svg>
+            <input type="search" value={state.query} placeholder="Search bikes, strollers, tomato plants…" aria-label="Search listings">
+          </div>
+
+          <div class="chip-row cluster" role="group" aria-label="Category">
+            <button type="button" class={["chip", !state.category && "is-active"]} onclick={() => state.category = ""}>All</button>
+            <button e:for={c of CATEGORIES}
+                    type="button"
+                    class={["chip", state.category === c.id && "is-active"]}
+                    onclick={() => state.category = state.category === c.id ? "" : c.id}>
+              {c.label}
+            </button>
+          </div>
+
+          <div class="browse-filters row">
+            <div class="browse-price cluster">
+              <select value={state.price} aria-label="Price">
+                <option e:for={p of PRICE_OPTIONS} value={p.value}>{p.label}</option>
+              </select>
+              <label><input type="checkbox" checked={state.showSold}> Show sold</label>
+            </div>
+
+            <div class="cluster is-sm">
+              <button e:if={!isFilterEmpty(toFilter(state))} type="button" class="is-ghost is-sm" onclick={() => onClear(state)}>Clear</button>
+              <button e:if={isSearchSaved(searches, state)} type="button" class="is-ghost is-sm save-search is-done" disabled>Search saved</button>
+              <button e:elseif={!isFilterEmpty(toFilter(state))}
+                      type="button"
+                      class="is-sm save-search"
+                      onclick={() => onSaveSearch(searches, state, me, neighborhoodId)}>
+                Save search, email me new matches
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <ul e:if={visible(listings, state).length > 0} class="listing-grid">
+          <ListingCard e:for={listing of visible(listings, state)} {listing} {saved} {me} />
+        </ul>
+
+        <div e:else class="browse-empty stack is-sm">
+          <strong>Nothing matches yet.</strong>
+          <p>Save this search and we'll email you when a neighbor posts one.</p>
+        </div>
+      </main>
+    </div>
+  </body>
+</html>
