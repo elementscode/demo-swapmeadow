@@ -1,0 +1,208 @@
+import "./style.css";
+import { LiveView, redirect } from "@elements/app";
+import { SiteHeader } from "#app/shared/templates/site-header";
+import { StatusPill } from "#app/shared/templates/listing-card";
+import { Inbox, contactSeller } from "#app/shared/services/conversations";
+import { SavedListing, isSaved, toggleSaved } from "#app/shared/services/saved";
+import {
+  Listing,
+  ListingPhoto,
+  Status,
+  photoUrl,
+  formatPrice,
+  categoryLabel,
+  conditionLabel,
+  timeAgo,
+  setStatus,
+} from "#app/shared/services/listings";
+
+interface Composer {
+  body: string;
+  error: string;
+  sending: boolean;
+}
+
+const STATUS_OPTIONS: { id: Status; label: string }[] = [
+  { id: "available", label: "Available" },
+  { id: "pending", label: "Pending" },
+  { id: "sold", label: "Sold" },
+];
+
+function firstName(name: string): string {
+  return name.split(" ")[0];
+}
+
+function onContact(listing: Listing, composer: Composer) {
+  composer.error = "";
+  composer.sending = true;
+
+  try {
+    let id = contactSeller(listing.id, composer.body);
+    redirect(`/messages/${id}`);
+  } catch (err: any) {
+    composer.error = err.message;
+    composer.sending = false;
+  }
+}
+
+function inquiries(inbox: Inbox, listingId: string) {
+  return inbox.selling
+    .filter((c) => c.listingId === listingId)
+    .sort((a, b) => +b.lastMessageAt - +a.lastMessageAt);
+}
+
+<Gallery (photos: ListingPhoto[], title: string, private current: { index: number } = { index: 0 })>
+  <div class="stack is-sm">
+    <div class="gallery-main">
+      <img e:if={photos.length > 0} src={photoUrl(photos[current.index])} alt={title} width="900" height="675">
+    </div>
+
+    <div e:if={photos.length > 1} class="gallery-thumbs row">
+      <button e:for={photo of photos}
+              type="button"
+              class={["gallery-thumb", photos.indexOf(photo) === current.index && "is-active"]}
+              aria-label={`Photo ${photos.indexOf(photo) + 1}`}
+              onclick={() => current.index = photos.indexOf(photo)}>
+        <img src={photoUrl(photo)} alt="" width="80" height="60">
+      </button>
+    </div>
+
+    <p e:if={photos[current.index]?.credit} class="photo-credit">{photos[current.index].credit}</p>
+  </div>
+</Gallery>
+
+<SellerPanel (listing: Listing, view: LiveView<Listing>, inbox: Inbox)>
+  <div class="card">
+    <div class="card-body stack is-md">
+      <div class="stack is-xs">
+        <strong>This is your listing</strong>
+        <p class="hint">Neighbors watching it see the change right away.</p>
+      </div>
+
+      <div class="status-switch" role="group" aria-label="Listing status">
+        <button e:for={option of STATUS_OPTIONS}
+                type="button"
+                class={[listing.status === option.id && "is-active"]}
+                aria-pressed={listing.status === option.id}
+                onclick={() => setStatus(view, listing, option.id)}>
+          {option.label}
+        </button>
+      </div>
+
+      <div e:if={inquiries(inbox, listing.id).length > 0} class="stack is-xs inquiries">
+        <strong class="text-sm">Messages about this</strong>
+        <a e:for={c of inquiries(inbox, listing.id)} href={`/messages/${c.id}`}>
+          {c.buyerName}
+          <span>{c.lastMessageBody}</span>
+        </a>
+      </div>
+    </div>
+  </div>
+</SellerPanel>
+
+<BuyerPanel (
+  listing: Listing,
+  conversationId: string | null,
+  private composer: Composer = { body: `Hi ${firstName(listing.sellerName)}, is this still available?`, error: "", sending: false },
+)>
+  <div class="card">
+    <div e:if={conversationId} class="card-body stack is-sm">
+      <strong>You're talking with {firstName(listing.sellerName)} about this.</strong>
+      <a class="button is-primary is-block" href={`/messages/${conversationId}`}>Open conversation</a>
+    </div>
+
+    <div e:elseif={listing.status === "sold"} class="card-body stack is-xs">
+      <strong>This one's sold.</strong>
+      <p class="hint">Save a search from the browse page and we'll email you when something like it comes up.</p>
+    </div>
+
+    <form e:else class="card-body stack is-sm" onsubmit={() => onContact(listing, composer)}>
+      <label for="message"><strong>Message {firstName(listing.sellerName)}</strong></label>
+      <p e:if={listing.status === "pending"} class="hint">Pending with another neighbor. You can still ask to be next in line.</p>
+      <textarea id="message" value={composer.body} rows={3} required></textarea>
+      <p e:if={composer.error} class="error">{composer.error}</p>
+      <button type="submit" class="is-primary is-block" disabled={composer.sending}>Send</button>
+    </form>
+  </div>
+</BuyerPanel>
+
+<ListingDetails (
+  listing: Listing,
+  view: LiveView<Listing>,
+  photos: ListingPhoto[],
+  me: string,
+  saved: LiveView<SavedListing>,
+  inbox: Inbox,
+  conversationId: string | null,
+)>
+  <div class="listing-layout">
+    <Gallery {photos} title={listing.title} />
+
+    <div class="listing-info stack is-lg">
+      <div class="stack is-sm">
+        <div class="cluster is-sm">
+          <span class={["listing-price", listing.price === 0 && "is-free"]}>{formatPrice(listing.price)}</span>
+          <StatusPill status={listing.status} />
+        </div>
+        <h1>{listing.title}</h1>
+        <p class="hint">Posted {timeAgo(listing.createdAt)} by {listing.sellerName}</p>
+      </div>
+
+      <SellerPanel e:if={listing.sellerId === me} {listing} {view} {inbox} />
+      <BuyerPanel e:else {listing} {conversationId} />
+
+      <button e:if={listing.sellerId !== me}
+              type="button"
+              class={["listing-save", "is-ghost", "row", isSaved(saved, listing.id) && "is-active"]}
+              onclick={() => toggleSaved(saved, listing.id, me)}>
+        <svg width="16" height="16" viewBox="0 0 24 24" aria-hidden="true">
+          <path d="M12 20.5s-7.5-4.6-7.5-10.1A4.4 4.4 0 0 1 12 7.6a4.4 4.4 0 0 1 7.5 2.8c0 5.5-7.5 10.1-7.5 10.1Z" stroke-linejoin="round"/>
+        </svg>
+        {isSaved(saved, listing.id) ? "Saved" : "Save for later"}
+      </button>
+
+      <dl class="listing-facts">
+        <dt>Category</dt>
+        <dd>{categoryLabel(listing.category)}</dd>
+        <dt>Condition</dt>
+        <dd>{conditionLabel(listing.condition)}</dd>
+        <dt>Seller</dt>
+        <dd>{listing.sellerName}</dd>
+      </dl>
+
+      <p e:if={listing.description} class="listing-description">{listing.description}</p>
+    </div>
+  </div>
+</ListingDetails>
+
+<html lang="en" class="page-listing" (
+  me: string,
+  listing: LiveView<Listing>,
+  photos: ListingPhoto[],
+  saved: LiveView<SavedListing>,
+  inbox: Inbox,
+  conversationId: string | null,
+)>
+  <head>
+    <title>{listing.at(0)?.title ?? "Listing"} · swapmeadow</title>
+    <meta name="description" content={listing.at(0)?.description ?? ""}>
+  </head>
+  <body>
+    <div class="app">
+      <SiteHeader active="browse" {inbox} />
+
+      <main class={["app-main", "page-shell", "listing-page", "stack", "is-md", listing.at(0)?.status === "sold" && "is-sold"]}>
+        <a class="listing-back" href="/">← Back to listings</a>
+
+        <ListingDetails e:for={row of listing}
+                        listing={row}
+                        view={listing}
+                        {photos}
+                        {me}
+                        {saved}
+                        {inbox}
+                        {conversationId} />
+      </main>
+    </div>
+  </body>
+</html>

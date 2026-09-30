@@ -1,0 +1,32 @@
+@import "#app/shared/styles/page.css";
+@import "#app/shared/styles/auth.css";
+
+.hood-options {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.hood-option {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+}
+
+.hood-option:has(input:checked) {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.hood-option strong {
+  display: block;
+  font-size: var(--text-sm);
+}
+
+.hood-option span {
+  font-size: var(--text-xs);
+  color: var(--ink-soft);
+}

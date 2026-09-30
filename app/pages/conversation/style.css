@@ -1,0 +1,119 @@
+@import "#app/shared/styles/page.css";
+
+.thread {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.thread-head {
+  border-bottom: 1px solid var(--rule);
+}
+
+.thread-head-inner {
+  gap: var(--space-3);
+  padding-block: var(--space-3);
+}
+
+.thread-head img {
+  width: 3rem;
+  height: 3rem;
+  flex: none;
+  border-radius: var(--radius-md);
+  object-fit: cover;
+  background: var(--bg-muted);
+}
+
+.thread-head-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.thread-head-text a {
+  overflow: hidden;
+  font-weight: var(--weight-semibold);
+  color: var(--ink);
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  text-decoration: none;
+}
+
+.thread-head-text a:hover {
+  text-decoration: underline;
+}
+
+.thread-head-meta {
+  gap: var(--space-1);
+  font-size: var(--text-sm);
+  color: var(--ink-soft);
+}
+
+.thread-back {
+  flex: none;
+  font-size: var(--text-sm);
+}
+
+.thread-feed {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.bubbles {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin-block: 0;
+  padding-block: var(--space-6);
+  list-style: none;
+}
+
+.bubble {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  max-width: min(32rem, 80%);
+}
+
+.bubble p {
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  border-radius: 1.1rem 1.1rem 1.1rem 0.35rem;
+  background: var(--bg-muted);
+  color: var(--ink);
+  white-space: pre-line;
+  overflow-wrap: anywhere;
+}
+
+.bubble.is-mine {
+  align-self: flex-end;
+  align-items: flex-end;
+}
+
+.bubble.is-mine p {
+  border-radius: 1.1rem 1.1rem 0.35rem 1.1rem;
+  background: var(--accent);
+  color: var(--accent-ink);
+}
+
+.bubble time {
+  padding-inline: var(--space-2);
+  font-size: var(--text-xs);
+  color: var(--ink-soft);
+}
+
+.thread-compose {
+  border-top: 1px solid var(--rule);
+  background: var(--bg);
+}
+
+.thread-compose form {
+  gap: var(--space-2);
+  padding-block: var(--space-3);
+}
+
+.thread-compose input {
+  flex: 1;
+  min-width: 0;
+}
