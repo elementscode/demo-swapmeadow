@@ -1,4 +1,4 @@
-![Swapmeadow, a neighborhood marketplace built with Elements: the Maple Hill listings grid with photos, prices, Free listings, saved hearts and a Pending bike.](https://elements.dev/demos/01a0f3f0-6a71-7c35-9b88-bc3992ca1a54/poster?v=b7e9257889be)
+![Swapmeadow, a neighborhood marketplace built with Elements: the Maple Hill listings grid with photos, prices, Free listings, saved hearts and a Pending bike.](https://elements.dev/demos/01a0f3f0-6a71-7c35-9b88-bc3992ca1a54/poster?v=c5dfbd636791)
 
 # Swapmeadow
 
@@ -28,8 +28,8 @@ elements create swapmeadow -scaffold=elementscode/demo-swapmeadow
 The development seed creates four neighborhoods, eight neighbors in Maple Hill
 and Riverside, 30 listings with photos across eight categories (some free,
 pending or sold), six buyer-seller conversations, and a few saved listings and
-saved searches. The listing photos are openly licensed images from Wikimedia
-Commons, credited under each photo.
+saved searches. The listing photos are CC0 or public domain, credited under
+each photo.
 
 Every account's password is `meadowlark`, and the sign-in page lists them.
 Maya has two unread messages, so she is a good first account.
@@ -72,3 +72,5 @@ Messages and listing status update in real time.
 ## License
 
 MIT. See [LICENSE](LICENSE).
+
+Listing photos are CC0 or public domain, from Wikimedia Commons and Openverse; credits are in the seed.
