@@ -1,12 +1,12 @@
-![Swapmeadow, a neighborhood marketplace built with Elements: the Maple Hill listings grid with photos, prices, Free listings, saved hearts and a Pending bike.](POSTER_URL)
+![Swapmeadow, a neighborhood marketplace built with Elements: the Maple Hill listings grid with photos, prices, Free listings, saved hearts and a Pending bike.](https://elements.dev/demos/01a0f3f0-6a71-7c35-9b88-bc3992ca1a54/poster?v=b7e9257889be)
 
 # Swapmeadow
 
 > A demo app built with [Elements](https://elements.dev).
 
-Listings with photos, prices or free, search by neighborhood, a message thread per buyer and listing, pending and sold that update live, and saved search alerts.
+Photo listings, priced or free, neighborhood search, buyer-seller threads, live pending and sold, and saved search email alerts.
 
-**Demo:** [Swapmeadow](TBD)
+**Demo:** [Swapmeadow](https://elements.dev/demos/01a0f3f0-6a71-7c35-9b88-bc3992ca1a54)
 
 ## Agent specs
 
