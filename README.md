@@ -38,7 +38,7 @@ Swapmeadow needed photo uploads, listings kept to each neighborhood, buyer and s
 
 ### What the project server gave the agent
 
-The project server runs alongside the agent and answers as soon as a file is saved: it type-checks the templates, TypeScript and SQL, applies migrations and reruns the tests, so every question came back right away and the agent kept building. When a seed migration held a value the database could not store, the next save reported the database's own error for that file.
+The project server runs alongside the agent and answers as soon as a file is saved: it type-checks the templates, TypeScript and SQL, applies migrations and reruns the tests, so every question came back right away and the agent kept building.
 
 ### What shipped
 
