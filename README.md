@@ -38,7 +38,7 @@ Swapmeadow needed photo uploads, listings kept to each neighborhood, buyer and s
 
 ### What the agent got from the tooling
 
-The agent ran 30 builds in 25 minutes. By the build's own timer, the median build finished in 21 milliseconds, so it checked its work after each edit and kept going. Along the way the build caught a class binding that could be `false` in the site header, a seed migration that failed with the database's own error, and a test call with the wrong arguments, each pointed at its file. The agent read the manual for each part as it reached it, 42 pages from `recipes/bidirectional-partition` and `livetable/mutations` to `style/email`, then wrote 36 tests. In a real browser it signed in a seller and a buyer side by side to watch messages and status changes arrive live, and checked its pages at phone width.
+The agent ran 30 builds in 25 minutes. It checked its work after each edit and kept going. Along the way the build caught a class binding that could be `false` in the site header, a seed migration that failed with the database's own error, and a test call with the wrong arguments, each pointed at its file. The agent read the manual for each part as it reached it, 42 pages from `recipes/bidirectional-partition` and `livetable/mutations` to `style/email`, then wrote 36 tests. In a real browser it signed in a seller and a buyer side by side to watch messages and status changes arrive live, and checked its pages at phone width.
 
 Start in `app/shared/services/listings.ts`.
 
