@@ -29,16 +29,16 @@ Swapmeadow needed photo uploads, listings kept to each neighborhood, buyer and s
 
 ### What Elements gave the app
 
-- **Live listings.** `listings` in `app/shared/services/listings.ts` is a LiveTable partitioned by neighborhood and by seller. When a seller marks an item pending or sold from `/selling`, the change goes through the view the page holds and every neighbor's browse page updates with it.
+- **Live listings.** `listings` in `app/shared/services/listings.ts` is a LiveTable partitioned by neighborhood and by seller. When a seller marks an item pending or sold from `/selling`, every neighbor's browse page updates with it.
 - **Live threads and an inbox.** `messages` and `conversations` in `app/shared/services/conversations.ts` are LiveTables. A database trigger copies each new message onto its conversation, so the header badge and the inbox fill in as a reply arrives.
-- **Uploads as function calls.** The sell page calls `createListing`, an `@rpc` that takes up to six photos as `File` values, checks every field, and stores the listing and its photos in one transaction. `app/routes/photos.ts` serves each photo under its content hash.
-- **Saved searches by email.** `createListing` schedules `NotifySavedSearchesJob` in `app/jobs/notify-saved-searches.ts`, which finds the neighbors whose saved searches match and sends each one a single `saved-search-match` email, however many of their searches it matched.
+- **Uploads as function calls.** The sell page calls `createListing`, an `@rpc` that takes up to six photos as `File` values and stores the listing and its photos in one transaction. `app/routes/photos.ts` serves each photo under its content hash.
+- **Saved searches by email.** `createListing` schedules `NotifySavedSearchesJob` in `app/jobs/notify-saved-searches.ts`, which finds the neighbors whose saved searches match and sends each one a single `saved-search-match` email, however many of their searches it matches.
 - **Data from SQL files.** Four migrations define the schema, add four neighborhoods, and seed eight neighbors with 30 listings, buyer and seller threads, saved items and saved searches, plus 34 listing photos, each credited.
 - **Sessions.** Every write checks the signed-in user: only the seller can change a listing's status, only the two people in a thread can post to it, and saves stay in your own neighborhood.
 
 ### What the agent got from the tooling
 
-The agent ran 30 builds in 25 minutes. By the build's own timer, the median build finished in 21 milliseconds, so it checked its work after each edit and kept going. Along the way the build caught a class binding that could be `false` in the site header, a seed migration that failed with the database's own error, and a test call with the wrong arguments, each pointed at its file. The agent read the manual for each part as it reached it, 42 pages from `recipes/bidirectional-partition` and `livetable/mutations` to `style/email`, then wrote 36 tests. In a real browser it signed in a seller and a buyer side by side to watch messages and status changes arrive live, and checked the pages at phone width.
+The agent ran 30 builds in 25 minutes. By the build's own timer, the median build finished in 21 milliseconds, so it checked its work after each edit and kept going. Along the way the build caught a class binding that could be `false` in the site header, a seed migration that failed with the database's own error, and a test call with the wrong arguments, each pointed at its file The agent read the manual for each part as it reached it, 42 pages from `recipes/bidirectional-partition` and `livetable/mutations` to `style/email`, then wrote 36 tests. In a real browser it signed in a seller and a buyer side by side to watch messages and status changes arrive live, and checked its pages at phone width.
 
 Start in `app/shared/services/listings.ts`.
 
