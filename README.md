@@ -42,7 +42,7 @@ The project server runs alongside the agent and answers as soon as a file is sav
 
 ### What shipped
 
-The app type-checks with zero errors and all 36 tests pass. During the build the agent signed in a seller and a buyer side by side and watched messages and status changes arrive live. Every page was checked on desktop and phone before publishing.
+The app type-checks with zero errors and all 36 tests pass. Every page works on desktop and phone, and live updates arrive across tabs, such as new messages and a listing marked pending or sold.
 
 Start in `app/shared/services/listings.ts`.
 
