@@ -29,12 +29,12 @@ Swapmeadow needed photo uploads, listings kept to each neighborhood, buyer and s
 
 ### What Elements gave the app
 
-- **Live listings.** `listings` in `app/shared/services/listings.ts` is a LiveTable partitioned by neighborhood and by seller. When a seller marks an item pending or sold from `/selling`, every neighbor's browse page updates with it.
-- **Live threads and an inbox.** `messages` and `conversations` in `app/shared/services/conversations.ts` are LiveTables. A database trigger copies each new message onto its conversation, so the header badge and the inbox fill in as a reply arrives.
-- **Uploads as function calls.** The sell page calls `createListing`, an `@rpc` that takes up to six photos as `File` values and stores the listing and its photos in one transaction. `app/routes/photos.ts` serves each photo under its content hash.
-- **Saved searches by email.** `createListing` schedules `NotifySavedSearchesJob` in `app/jobs/notify-saved-searches.ts`, which finds the neighbors whose saved searches match and sends each one a single `saved-search-match` email, however many of their searches it matches.
+- **Live listings.** Listings are a LiveTable opened per neighborhood and per seller. When a seller marks an item pending or sold, every neighbor's browse page updates with it.
+- **Live threads and an inbox.** Messages and conversations are LiveTables. A database trigger copies each new message onto its conversation, so the header badge and the inbox fill in as a reply arrives.
+- **Photo uploads as function calls.** The sell page sends up to six photos to an `@rpc` as `File` values, which stores the listing and its photos in one transaction, and a route serves each photo under its content hash.
+- **Saved searches by email.** Posting a listing schedules a background job that finds the neighbors whose saved searches match and sends each one a single email, however many of their searches it matches.
 - **Data from SQL files.** Four migrations define the schema, add four neighborhoods, and seed eight neighbors with 30 listings, buyer and seller threads, saved items and saved searches, plus 34 credited listing photos.
-- **Sessions.** Every write checks the signed-in user: only the seller can change a listing's status, only the two people in a thread can post to it, and saves stay in your own neighborhood.
+- **Sessions.** Every write checks the signed-in user: the seller sets a listing's status, the two people in a thread post to it, and saves stay in your own neighborhood.
 
 ### What the project server gave the agent
 
@@ -43,8 +43,6 @@ The project server runs alongside the agent and answers as soon as a file is sav
 ### What shipped
 
 The app type-checks with zero errors and all 36 tests pass. Every page works on desktop and phone, and live updates arrive across tabs, such as new messages and a listing marked pending or sold.
-
-Start in `app/shared/services/listings.ts`.
 
 ## Seed data and demo accounts
 
