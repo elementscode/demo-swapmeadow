@@ -36,9 +36,13 @@ Swapmeadow needed photo uploads, listings kept to each neighborhood, buyer and s
 - **Data from SQL files.** Four migrations define the schema, add four neighborhoods, and seed eight neighbors with 30 listings, buyer and seller threads, saved items and saved searches, plus 34 credited listing photos.
 - **Sessions.** Every write checks the signed-in user: only the seller can change a listing's status, only the two people in a thread can post to it, and saves stay in your own neighborhood.
 
-### What the agent got from the tooling
+### What the project server gave the agent
 
-The agent ran 30 builds in 25 minutes. It checked its work after each edit and kept going. Along the way the build caught a class binding that could be `false` in the site header, a seed migration that failed with the database's own error, and a test call with the wrong arguments, each pointed at its file. The agent read the manual for each part as it reached it, 42 pages from `recipes/bidirectional-partition` and `livetable/mutations` to `style/email`, then wrote 36 tests. In a real browser it signed in a seller and a buyer side by side to watch messages and status changes arrive live, and checked its pages at phone width.
+The project server runs alongside the agent and answers as soon as a file is saved: it type-checks the templates, TypeScript and SQL, applies migrations and reruns the tests, so every question came back right away and the agent kept building. When a seed migration held a value the database could not store, the next save reported the database's own error for that file.
+
+### What shipped
+
+The app type-checks with zero errors and all 36 tests pass. During the build the agent signed in a seller and a buyer side by side and watched messages and status changes arrive live. Every page was checked on desktop and phone before publishing, and the repo was installed fresh from GitHub and run before the demo went live.
 
 Start in `app/shared/services/listings.ts`.
 
