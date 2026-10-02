@@ -10,9 +10,6 @@ Photo listings, priced or free, neighborhood search, buyer-seller threads, live 
 
 ## Agent specs
 
-What one run of the prompt below took, from an empty Elements project to this
-app.
-
 - **Agent:** Claude Code, Opus 5.5 Medium
 - **Time:** 25 min
 - **Cost:** $7.39 at API rates, September 2026
@@ -74,26 +71,7 @@ Maya has two unread messages, so she is a good first account.
 Saved search alerts are sent by a background job. In development, emails are
 written to `.elements/logs/job.log` instead of being sent.
 
-## The prompt
-
-```text
-Build a neighborhood marketplace named swapmeadow, for buying, selling and giving
-away things locally.
-
-- Sign up with a neighborhood.
-- Post a listing: title, price or free, category, condition, description,
-  photos.
-- Browse listings in your neighborhood, filter by category and price, search.
-- Message a seller about a listing; each conversation is between one buyer
-  and the seller.
-- Sellers mark a listing pending or sold.
-- Save listings, and get an email when a saved search has new matches.
-
-Seed eight neighbors, thirty listings with photos across categories, and a few
-conversations. Show the seeded logins on the sign-in page.
-
-Messages and listing status update in real time.
-```
+**Demo:** [Swapmeadow](https://elements.dev/demos/01a0f3f0-6a71-7c35-9b88-bc3992ca1a54)
 
 ## License
 
