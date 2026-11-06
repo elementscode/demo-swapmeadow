@@ -2,6 +2,11 @@ import "./style.css";
 import { redirect } from "@elements/app";
 import { signin } from "#app/shared/services/auth";
 import { Logo } from "#app/shared/templates/site-header";
+import { Alert } from "@elements/ui/alert";
+import { Button } from "@elements/ui/button";
+import { Field } from "@elements/ui/field";
+import { Icon } from "@elements/ui/icon";
+import { Input } from "@elements/ui/input";
 
 export interface DemoLogin {
   name: string;
@@ -66,32 +71,28 @@ function onPickDemo(form: SigninForm, demo: DemoLogin) {
         <form class="auth-form stack is-md" onsubmit={() => onSubmit(form)}>
           <h2>Sign in</h2>
 
-          <p e:if={form.error} class="error" role="alert">{form.error}</p>
+          <Alert e:if={form.error} variant="danger" description={form.error}>
+            <Icon name="alert-circle" />
+          </Alert>
 
-          <div class="field">
-            <label for="email">Email</label>
-            <input id="email"
+          <Field label="Email">
+            <Input type="email"
                    name="email"
-                   type="email"
                    value={form.email}
-                   autocomplete="email"
-                   autocapitalize="none"
-                   spellcheck={false}
                    placeholder="you@example.com"
-                   required>
-          </div>
+                   required
+                   attrs={{ autocomplete: "email", autocapitalize: "none", spellcheck: "false" }} />
+          </Field>
 
-          <div class="field">
-            <label for="password">Password</label>
-            <input id="password"
+          <Field label="Password">
+            <Input type="password"
                    name="password"
-                   type="password"
                    value={form.password}
-                   autocomplete="current-password"
-                   required>
-          </div>
+                   required
+                   attrs={{ autocomplete: "current-password" }} />
+          </Field>
 
-          <button type="submit" class="is-primary is-block">Sign in</button>
+          <Button type="submit" variant="primary" block>Sign in</Button>
 
           <p class="hint">New here? <a href="/signup">Join your neighborhood</a></p>
         </form>

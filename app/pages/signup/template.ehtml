@@ -2,6 +2,12 @@ import "./style.css";
 import { redirect, ValidationError } from "@elements/app";
 import { signup, SignupForm, Neighborhood, MIN_PASSWORD } from "#app/shared/services/auth";
 import { Logo } from "#app/shared/templates/site-header";
+import { Alert } from "@elements/ui/alert";
+import { Button } from "@elements/ui/button";
+import { Field, FieldContent, FieldDescription, FieldLabel, FieldLegend, FieldSet, FieldTitle } from "@elements/ui/field";
+import { Icon } from "@elements/ui/icon";
+import { Input } from "@elements/ui/input";
+import { RadioGroup, RadioGroupItem } from "@elements/ui/radio-group";
 
 type Errors = Partial<Record<keyof SignupForm | "form", string[]>>;
 
@@ -41,59 +47,48 @@ function onSubmit(form: SignupForm, state: { errors: Errors }) {
         <form class="auth-form stack is-md" onsubmit={() => onSubmit(form, state)}>
           <h2>Join your neighborhood</h2>
 
-          <p e:if={state.errors.form} class="error" role="alert">{state.errors.form?.[0]}</p>
+          <Alert e:if={state.errors.form} variant="danger" description={state.errors.form?.[0] ?? ""}>
+            <Icon name="alert-circle" />
+          </Alert>
 
-          <div class="field">
-            <label for="name">Your name</label>
-            <input id="name" name="name" value={form.name} autocomplete="given-name" placeholder="Jess"
-                   class={[state.errors.name && "is-error"]} required>
-            <p e:if={state.errors.name} class="error">{state.errors.name?.[0]}</p>
-          </div>
+          <Field label="Your name" error={state.errors.name?.[0] ?? ""}>
+            <Input name="name" value={form.name} placeholder="Jess" required attrs={{ autocomplete: "given-name" }} />
+          </Field>
 
-          <div class="field">
-            <label for="email">Email</label>
-            <input id="email"
+          <Field label="Email" error={state.errors.email?.[0] ?? ""}>
+            <Input type="email"
                    name="email"
-                   type="email"
                    value={form.email}
-                   autocomplete="email"
-                   autocapitalize="none"
-                   spellcheck={false}
                    placeholder="you@example.com"
-                   class={[state.errors.email && "is-error"]}
-                   required>
-            <p e:if={state.errors.email} class="error">{state.errors.email?.[0]}</p>
-          </div>
+                   required
+                   attrs={{ autocomplete: "email", autocapitalize: "none", spellcheck: "false" }} />
+          </Field>
 
-          <div class="field">
-            <label for="password">Password</label>
-            <input id="password"
+          <Field label="Password" description={`At least ${MIN_PASSWORD} characters.`} error={state.errors.password?.[0] ?? ""}>
+            <Input type="password"
                    name="password"
-                   type="password"
                    value={form.password}
-                   autocomplete="new-password"
-                   minlength={MIN_PASSWORD}
-                   class={[state.errors.password && "is-error"]}
-                   required>
-            <p e:if={state.errors.password} class="error">{state.errors.password?.[0]}</p>
-            <p e:else class="hint">At least {MIN_PASSWORD} characters.</p>
-          </div>
+                   required
+                   attrs={{ autocomplete: "new-password", minlength: MIN_PASSWORD }} />
+          </Field>
 
-          <fieldset class="stack is-sm">
-            <legend>Neighborhood</legend>
-            <div class="hood-options">
-              <label e:for={n of neighborhoods} class="hood-option">
-                <input type="radio" name="neighborhood" value={n.id} group={form.neighborhoodId}>
-                <div>
-                  <strong>{n.name}</strong>
-                  <span>{n.area}</span>
-                </div>
-              </label>
-            </div>
+          <FieldSet>
+            <FieldLegend variant="label">Neighborhood</FieldLegend>
+            <RadioGroup name="neighborhood" class="hood-options" value={form.neighborhoodId} attrs={{ "aria-label": "Neighborhood" }}>
+              <FieldLabel e:for={n of neighborhoods}>
+                <Field orientation="horizontal" reserveError={false}>
+                  <RadioGroupItem value={n.id} />
+                  <FieldContent>
+                    <FieldTitle>{n.name}</FieldTitle>
+                    <FieldDescription>{n.area}</FieldDescription>
+                  </FieldContent>
+                </Field>
+              </FieldLabel>
+            </RadioGroup>
             <p e:if={state.errors.neighborhoodId} class="error">{state.errors.neighborhoodId?.[0]}</p>
-          </fieldset>
+          </FieldSet>
 
-          <button type="submit" class="is-primary is-block">Create account</button>
+          <Button type="submit" variant="primary" block>Create account</Button>
         </form>
       </main>
     </div>
