@@ -85,7 +85,7 @@ function onSubmit(form: ListingForm, submit: Submit) {
           </Field>
 
           <Field label="Category" error={submit.errors.category?.[0] ?? ""}>
-            <NativeSelect value={form.category} placeholder="Choose a category" options={CATEGORY_OPTIONS} block />
+            <NativeSelect value={form.category} placeholder="Choose a category" options={CATEGORY_OPTIONS} required block />
           </Field>
 
           <FieldSet>
