@@ -4,6 +4,10 @@ import { SiteHeader } from "#app/shared/templates/site-header";
 import { StatusPill } from "#app/shared/templates/listing-card";
 import { Inbox, Conversation, Message, markRead } from "#app/shared/services/conversations";
 import { Listing, formatPrice } from "#app/shared/services/listings";
+import { Button } from "@elements/ui/button";
+import { Input } from "@elements/ui/input";
+import { Message as Bubble, MessageContent } from "@elements/ui/message";
+import { MessageList } from "@elements/ui/message-list";
 
 function ordered(messages: LiveView<Message>): Message[] {
   return messages.sort((a, b) => +a.createdAt - +b.createdAt);
@@ -30,9 +34,7 @@ function onSend(messages: LiveView<Message>, me: string, myName: string, draft: 
 }
 
 /** A message arriving while the thread is open is a message read. */
-function onBubble(el: Element, message: Message, me: string, conversationId: string) {
-  el.scrollIntoView({ block: "end" });
-
+function onBubble(message: Message, me: string, conversationId: string) {
   if (message.senderId !== me && Date.now() - +message.createdAt < 60_000) {
     markRead(conversationId);
   }
@@ -81,21 +83,22 @@ function other(c: Conversation, me: string): string {
       <main class="app-main thread">
         <ThreadHead {conversation} {listing} {me} />
 
-        <div class="thread-feed">
-          <ol class="page-shell is-form bubbles" aria-live="polite">
-            <li e:for={m of ordered(messages)}
-                class={["bubble", m.senderId === me && "is-mine"]}
-                oninsert={(e) => onBubble(e.target, m, me, conversation.id)}>
-              <p>{m.body}</p>
-              <time>{clock(m.createdAt)}</time>
-            </li>
-          </ol>
-        </div>
+        <MessageList class="thread-feed" contentClass="page-shell is-form" label={`Conversation with ${other(conversation, me)}`}>
+          <Bubble e:for={m of ordered(messages)}
+                  from={m.senderId === me ? "user" : "assistant"}
+                  variant="bubble"
+                  class={m.senderId === me ? "is-mine" : ""}
+                  time={m.createdAt.toISOString()}
+                  timeLabel={clock(m.createdAt)}
+                  oninsert={() => onBubble(m, me, conversation.id)}>
+            <MessageContent>{m.body}</MessageContent>
+          </Bubble>
+        </MessageList>
 
         <div class="thread-compose">
           <form class="page-shell is-form row" onsubmit={() => onSend(messages, me, myName, draft)}>
-            <input value={draft.body} placeholder={`Message ${other(conversation, me)}`} aria-label="Message" autocomplete="off" required>
-            <button type="submit" class="is-primary">Send</button>
+            <Input value={draft.body} placeholder={`Message ${other(conversation, me)}`} required attrs={{ "aria-label": "Message", autocomplete: "off" }} />
+            <Button type="submit" variant="primary">Send</Button>
           </form>
         </div>
       </main>
