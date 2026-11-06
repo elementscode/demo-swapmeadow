@@ -121,6 +121,7 @@
 }
 
 .inquiries span {
+  min-width: 0;
   overflow: hidden;
   color: var(--ink-soft);
   white-space: nowrap;
@@ -137,7 +138,7 @@
 
 @media (max-width: 52rem) {
   .listing-layout {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: var(--space-6);
   }
 
