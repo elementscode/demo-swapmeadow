@@ -4,6 +4,8 @@
 
 > Swapmeadow is a full-stack app built with Claude Code on Elements.
 
+Swapmeadow uses the `commerce` theme from @elements/ui.
+
 Photo listings, priced or free, neighborhood search, buyer-seller threads, live pending and sold, and saved search email alerts.
 
 [Run this app on your machine](https://elements.dev/demos/01a0f3f0-6a71-7c35-9b88-bc3992ca1a54). Use this demo as inspiration, or as the starting point for your own app. Your agent creates a new app with this one as the scaffold, and you prompt it to add whatever features you want.
