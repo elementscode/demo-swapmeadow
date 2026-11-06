@@ -110,31 +110,7 @@
 .status-switch {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 0;
-}
-
-.status-switch button {
-  border-radius: 0;
-}
-
-.status-switch button:first-child {
-  border-radius: var(--radius-md) 0 0 var(--radius-md);
-}
-
-.status-switch button:last-child {
-  border-radius: 0 var(--radius-md) var(--radius-md) 0;
-}
-
-.status-switch button + button {
-  margin-inline-start: -1px;
-}
-
-.status-switch button.is-active {
-  position: relative;
-  z-index: 1;
-  border-color: var(--accent);
-  background: var(--accent-soft);
-  color: var(--accent-deep);
+  width: 100%;
 }
 
 .inquiries a {
@@ -151,23 +127,11 @@
   text-overflow: ellipsis;
 }
 
-.listing-save {
-  gap: var(--space-2);
+.listing-save[data-saved] {
+  color: var(--danger);
 }
 
-.listing-save svg {
-  width: 1rem;
-  height: 1rem;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 2;
-}
-
-.listing-save.is-active {
-  color: #c73642;
-}
-
-.listing-save.is-active svg {
+.listing-save[data-saved] svg {
   fill: currentColor;
 }
 
