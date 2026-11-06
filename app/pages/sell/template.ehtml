@@ -1,32 +1,28 @@
 import "./style.css";
-import { File, redirect, ValidationError } from "@elements/app";
+import { redirect, ValidationError } from "@elements/app";
 import { SiteHeader } from "#app/shared/templates/site-header";
 import { Inbox } from "#app/shared/services/conversations";
 import { ListingForm, CATEGORIES, CONDITIONS, MAX_PHOTOS, createListing } from "#app/shared/services/listings";
+import { Alert } from "@elements/ui/alert";
+import { Button } from "@elements/ui/button";
+import { Checkbox } from "@elements/ui/checkbox";
+import { Field, FieldSet, FieldLegend } from "@elements/ui/field";
+import { FileUpload } from "@elements/ui/file-upload";
+import { Icon } from "@elements/ui/icon";
+import { Input } from "@elements/ui/input";
+import { InputGroup, InputGroupAddon, InputGroupText } from "@elements/ui/input-group";
+import { Label } from "@elements/ui/label";
+import { NativeSelect } from "@elements/ui/native-select";
+import { Textarea } from "@elements/ui/textarea";
+import { ToggleGroup, ToggleGroupItem } from "@elements/ui/toggle-group";
+
+const CATEGORY_OPTIONS = CATEGORIES.map((c) => ({ value: c.id, label: c.label }));
 
 type Errors = Partial<Record<keyof ListingForm | "form", string[]>>;
 
 interface Submit {
   errors: Errors;
   saving: boolean;
-}
-
-const previews = new WeakMap<File, string>();
-
-/** An object url per picked file, made once, so a repaint does not mint another. */
-function previewUrl(file: File): string {
-  let url = previews.get(file);
-
-  if (!url) {
-    url = URL.createObjectURL(new Blob([file.data as BlobPart], { type: file.contentType }));
-    previews.set(file, url);
-  }
-
-  return url;
-}
-
-function onRemovePhoto(form: ListingForm, file: File) {
-  form.photos = form.photos.filter((f) => f !== file);
 }
 
 function onSubmit(form: ListingForm, submit: Submit) {
@@ -62,77 +58,57 @@ function onSubmit(form: ListingForm, submit: Submit) {
         </div>
 
         <form class="stack is-lg" onsubmit={() => onSubmit(form, submit)}>
-          <p e:if={submit.errors.form} class="error" role="alert">{submit.errors.form?.[0]}</p>
+          <Alert e:if={submit.errors.form} variant="danger" description={submit.errors.form?.[0] ?? ""}>
+            <Icon name="alert-circle" />
+          </Alert>
 
-          <div class="field">
-            <label>Photos</label>
-            <label class={["photo-drop", submit.errors.photos && "is-error"]}>
-              <input type="file" multiple accept="image/png,image/jpeg,image/gif,image/webp" value={form.photos}>
-              <strong>{form.photos.length ? "Add more photos" : "Add photos"}</strong>
-              <span class="text-sm">Up to {MAX_PHOTOS}. The first one is the cover.</span>
-            </label>
-            <p e:if={submit.errors.photos} class="error">{submit.errors.photos?.[0]}</p>
-          </div>
+          <Field label="Photos" error={submit.errors.photos?.[0] ?? ""}>
+            <FileUpload files={form.photos}
+                        accept={["image/png", "image/jpeg", "image/gif", "image/webp"]}
+                        maxFiles={MAX_PHOTOS}
+                        hint={`Up to ${MAX_PHOTOS}. The first one is the cover.`}
+                        invalid={!!submit.errors.photos} />
+          </Field>
 
-          <ul e:if={form.photos.length > 0} class="photo-previews">
-            <li e:for={file of form.photos} class="photo-preview">
-              <img src={previewUrl(file)} alt={file.name} width="104" height="104">
-              <span e:if={form.photos.indexOf(file) === 0} class="pill is-accent">Cover</span>
-              <button type="button" aria-label={`Remove ${file.name}`} onclick={() => onRemovePhoto(form, file)}>×</button>
-            </li>
-          </ul>
+          <Field label="Title" error={submit.errors.title?.[0] ?? ""}>
+            <Input value={form.title} placeholder="Kids' bike, 16 inch" required attrs={{ maxlength: 80 }} />
+          </Field>
 
-          <div class="field">
-            <label for="title">Title</label>
-            <input id="title" value={form.title} maxlength={80} placeholder="Kids' bike, 16 inch"
-                   class={[submit.errors.title && "is-error"]} required>
-            <p e:if={submit.errors.title} class="error">{submit.errors.title?.[0]}</p>
-          </div>
-
-          <div class="field">
-            <label for="price">Price</label>
+          <Field label="Price" error={submit.errors.price?.[0] ?? ""}>
             <div class="price-row row">
-              <div class="price-input">
-                <span>$</span>
-                <input id="price" value={form.price} inputmode="numeric" placeholder="25"
-                       disabled={form.free} class={[submit.errors.price && "is-error"]}>
-              </div>
-              <label class="price-free"><input type="checkbox" checked={form.free}> Free, give it away</label>
+              <InputGroup class="price-input" disabled={form.free}>
+                <Input value={form.price} placeholder="25" attrs={{ inputmode: "numeric" }} />
+                <InputGroupAddon><InputGroupText>$</InputGroupText></InputGroupAddon>
+              </InputGroup>
+              <Label><Checkbox checked={form.free} /> Free, give it away</Label>
             </div>
-            <p e:if={submit.errors.price} class="error">{submit.errors.price?.[0]}</p>
-          </div>
+          </Field>
 
-          <div class="field">
-            <label for="category">Category</label>
-            <select id="category" value={form.category} class={[submit.errors.category && "is-error"]} required>
-              <option value="" disabled>Choose a category</option>
-              <option e:for={c of CATEGORIES} value={c.id}>{c.label}</option>
-            </select>
-            <p e:if={submit.errors.category} class="error">{submit.errors.category?.[0]}</p>
-          </div>
+          <Field label="Category" error={submit.errors.category?.[0] ?? ""}>
+            <NativeSelect value={form.category} placeholder="Choose a category" options={CATEGORY_OPTIONS} block />
+          </Field>
 
-          <fieldset class="stack is-sm">
-            <legend>Condition</legend>
-            <div class="condition-options">
-              <label e:for={c of CONDITIONS} class="condition-option">
-                <input type="radio" name="condition" value={c.id} group={form.condition}>
-                {c.label}
-              </label>
-            </div>
+          <FieldSet>
+            <FieldLegend variant="label">Condition</FieldLegend>
+            <ToggleGroup type="single"
+                         class="condition-options"
+                         variant="outline"
+                         label="Condition"
+                         value={form.condition}
+                         onValueChange={(value, details) => { if (!value) details.cancel(); }}>
+              <ToggleGroupItem e:for={c of CONDITIONS} value={c.id}>{c.label}</ToggleGroupItem>
+            </ToggleGroup>
             <p e:if={submit.errors.condition} class="error">{submit.errors.condition?.[0]}</p>
-          </fieldset>
+          </FieldSet>
 
-          <div class="field">
-            <label for="description">Description</label>
-            <textarea id="description" value={form.description} rows={5}
-                      placeholder="Size, age, any wear, and when it can be picked up."></textarea>
-          </div>
+          <Field label="Description">
+            <Textarea value={form.description} rows={5}
+                      placeholder="Size, age, any wear, and when it can be picked up." />
+          </Field>
 
           <div class="sell-actions row">
-            <a class="button is-ghost" href="/">Cancel</a>
-            <button type="submit" class="is-primary" disabled={submit.saving}>
-              {submit.saving ? "Posting…" : "Post listing"}
-            </button>
+            <Button variant="ghost" href="/">Cancel</Button>
+            <Button type="submit" variant="primary" loading={submit.saving}>Post listing</Button>
           </div>
         </form>
       </main>
