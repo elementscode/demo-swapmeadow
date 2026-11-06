@@ -63,9 +63,7 @@ function plural(n: number, word: string): string {
           <MyListing e:for={listing of newestFirst(listings)} {listing} view={listings} {inbox} first={newestFirst(listings).indexOf(listing) === 0} />
         </ItemGroup>
 
-        <div e:else>
-          <Empty variant="outline" title="Nothing listed yet." description="Post something you no longer need. Free things go fast." />
-        </div>
+        <Empty e:else variant="outline" class="flex-none" title="Nothing listed yet." description="Post something you no longer need. Free things go fast." />
       </main>
     </div>
   </body>

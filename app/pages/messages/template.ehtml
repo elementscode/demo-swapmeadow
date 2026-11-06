@@ -46,11 +46,9 @@ function otherName(c: Conversation, me: string): string {
           <InboxRow e:for={c of inboxRows(inbox)} {c} {me} first={inboxRows(inbox).indexOf(c) === 0} />
         </ItemGroup>
 
-        <div e:else>
-          <Empty variant="outline" title="No conversations yet." description="Message a seller from any listing and the conversation shows up here.">
-            <EmptyContent><Button href="/">Browse listings</Button></EmptyContent>
-          </Empty>
-        </div>
+        <Empty e:else variant="outline" class="flex-none" title="No conversations yet." description="Message a seller from any listing and the conversation shows up here.">
+          <EmptyContent><Button href="/">Browse listings</Button></EmptyContent>
+        </Empty>
       </main>
     </div>
   </body>

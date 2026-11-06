@@ -154,9 +154,7 @@ function forSaleCount(listings: LiveView<Listing>): number {
           <ListingCard e:for={listing of visible(listings, state)} {listing} {saved} {me} />
         </ul>
 
-        <div e:else>
-          <Empty variant="outline" title="Nothing matches yet." description="Save this search and we'll email you when a neighbor posts one." />
-        </div>
+        <Empty e:else variant="outline" class="flex-none" title="Nothing matches yet." description="Save this search and we'll email you when a neighbor posts one." />
       </main>
     </div>
   </body>
