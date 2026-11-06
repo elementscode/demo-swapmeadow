@@ -17,6 +17,8 @@
     --accent-edge: var(--brand-200);
     --item-selected: var(--accent-soft);
     --item-selected-ink: var(--accent-deep);
+    --message-user-bubble: var(--accent);
+    --message-user-bubble-ink: var(--accent-ink);
   }
 
   @media (prefers-color-scheme: dark) {

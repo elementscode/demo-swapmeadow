@@ -87,7 +87,6 @@ function other(c: Conversation, me: string): string {
           <Bubble e:for={m of ordered(messages)}
                   from={m.senderId === me ? "user" : "assistant"}
                   variant="bubble"
-                  class={m.senderId === me ? "is-mine" : ""}
                   time={m.createdAt.toISOString()}
                   timeLabel={clock(m.createdAt)}
                   oninsert={() => onBubble(m, me, conversation.id)}>
