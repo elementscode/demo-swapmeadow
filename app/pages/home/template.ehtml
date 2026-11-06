@@ -5,6 +5,15 @@ import { ListingCard } from "#app/shared/templates/listing-card";
 import { Inbox } from "#app/shared/services/conversations";
 import { Listing, Category, SearchFilter, CATEGORIES, matchesFilter, isFilterEmpty } from "#app/shared/services/listings";
 import { SavedListing, SavedSearch } from "#app/shared/services/saved";
+import { Button } from "@elements/ui/button";
+import { Input } from "@elements/ui/input";
+import { InputGroup, InputGroupAddon } from "@elements/ui/input-group";
+import { Icon } from "@elements/ui/icon";
+import { ToggleGroup, ToggleGroupItem } from "@elements/ui/toggle-group";
+import { NativeSelect } from "@elements/ui/native-select";
+import { Checkbox } from "@elements/ui/checkbox";
+import { Label } from "@elements/ui/label";
+import { Empty } from "@elements/ui/empty";
 
 export interface BrowseState {
   query: string;
@@ -102,45 +111,41 @@ function forSaleCount(listings: LiveView<Listing>): number {
             <h1>{neighborhoodName}</h1>
             <p class="browse-count">{forSaleCount(listings)} things for sale or free, from your neighbors</p>
           </div>
-          <a class="button is-primary" href="/sell">Post a listing</a>
+          <Button variant="primary" href="/sell">Post a listing</Button>
         </div>
 
         <div class="stack is-md">
-          <div class="browse-search">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
-              <circle cx="11" cy="11" r="7"/>
-              <path d="m20 20-3.5-3.5"/>
-            </svg>
-            <input type="search" value={state.query} placeholder="Search bikes, strollers, tomato plants…" aria-label="Search listings">
-          </div>
+          <InputGroup>
+            <Input type="search" value={state.query} placeholder="Search bikes, strollers, tomato plants…" attrs={{ "aria-label": "Search listings" }} />
+            <InputGroupAddon><Icon name="search" size={18} /></InputGroupAddon>
+          </InputGroup>
 
-          <div class="chip-row cluster" role="group" aria-label="Category">
-            <button type="button" class={["chip", !state.category && "is-active"]} onclick={() => state.category = ""}>All</button>
-            <button e:for={c of CATEGORIES}
-                    type="button"
-                    class={["chip", state.category === c.id && "is-active"]}
-                    onclick={() => state.category = state.category === c.id ? "" : c.id}>
-              {c.label}
-            </button>
-          </div>
+          <ToggleGroup type="single"
+                       class="category-filter"
+                       variant="outline"
+                       size="sm"
+                       label="Category"
+                       value={state.category || "all"}
+                       onValueChange={(value, details) => { details.cancel(); state.category = value === "all" ? "" : value as Category | ""; }}>
+            <ToggleGroupItem value="all">All</ToggleGroupItem>
+            <ToggleGroupItem e:for={c of CATEGORIES} value={c.id}>{c.label}</ToggleGroupItem>
+          </ToggleGroup>
 
           <div class="browse-filters row">
             <div class="browse-price cluster">
-              <select value={state.price} aria-label="Price">
-                <option e:for={p of PRICE_OPTIONS} value={p.value}>{p.label}</option>
-              </select>
-              <label><input type="checkbox" checked={state.showSold}> Show sold</label>
+              <NativeSelect value={state.price} size="sm" options={PRICE_OPTIONS} attrs={{ "aria-label": "Price" }} />
+              <Label><Checkbox checked={state.showSold} /> Show sold</Label>
             </div>
 
             <div class="cluster is-sm">
-              <button e:if={!isFilterEmpty(toFilter(state))} type="button" class="is-ghost is-sm" onclick={() => onClear(state)}>Clear</button>
-              <button e:if={isSearchSaved(searches, state)} type="button" class="is-ghost is-sm save-search is-done" disabled>Search saved</button>
-              <button e:elseif={!isFilterEmpty(toFilter(state))}
-                      type="button"
-                      class="is-sm save-search"
+              <Button e:if={!isFilterEmpty(toFilter(state))} variant="ghost" size="sm" onclick={() => onClear(state)}>Clear</Button>
+              <Button e:if={isSearchSaved(searches, state)} variant="ghost" size="sm" class="save-search" disabled>Search saved</Button>
+              <Button e:elseif={!isFilterEmpty(toFilter(state))}
+                      size="sm"
+                      class="save-search"
                       onclick={() => onSaveSearch(searches, state, me, neighborhoodId)}>
                 Save search, email me new matches
-              </button>
+              </Button>
             </div>
           </div>
         </div>
@@ -149,9 +154,8 @@ function forSaleCount(listings: LiveView<Listing>): number {
           <ListingCard e:for={listing of visible(listings, state)} {listing} {saved} {me} />
         </ul>
 
-        <div e:else class="browse-empty stack is-sm">
-          <strong>Nothing matches yet.</strong>
-          <p>Save this search and we'll email you when a neighbor posts one.</p>
+        <div e:else>
+          <Empty variant="outline" title="Nothing matches yet." description="Save this search and we'll email you when a neighbor posts one." />
         </div>
       </main>
     </div>

@@ -2,6 +2,8 @@ import "./style.css";
 import { session, redirect } from "@elements/app";
 import { Inbox, unreadCount } from "#app/shared/services/conversations";
 import { signout } from "#app/shared/services/auth";
+import { Button } from "@elements/ui/button";
+import { Badge } from "@elements/ui/badge";
 
 function onSignout() {
   signout();
@@ -33,15 +35,17 @@ function onSignout() {
         <a href="/saved" class={[active === "saved" && "is-active"]}>Saved</a>
         <a href="/messages" class={[active === "messages" && "is-active"]}>
           Messages
-          <span e:if={unreadCount(inbox, session.get("userId") ?? "") > 0} class="site-badge">
+          <Badge e:if={unreadCount(inbox, session.get("userId") ?? "") > 0}
+                 class="site-badge"
+                 attrs={{ "aria-label": `${unreadCount(inbox, session.get("userId") ?? "")} unread` }}>
             {unreadCount(inbox, session.get("userId") ?? "")}
-          </span>
+          </Badge>
         </a>
         <a href="/selling" class={[active === "selling" && "is-active"]}>Selling</a>
-        <a class="button is-primary is-sm" href="/sell">Post</a>
+        <Button variant="primary" size="sm" href="/sell">Post</Button>
       </nav>
 
-      <button class="is-ghost is-sm site-signout" onclick={() => onSignout()}>Sign out</button>
+      <Button variant="ghost" size="sm" class="site-signout" onclick={() => onSignout()}>Sign out</Button>
     </div>
   </header>
 </SiteHeader>

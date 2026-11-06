@@ -1,23 +1,23 @@
 import "./style.css";
 import { LiveView } from "@elements/app";
+import { Badge } from "@elements/ui/badge";
+import { Toggle } from "@elements/ui/toggle";
+import { Icon } from "@elements/ui/icon";
 import { Listing, formatPrice, conditionLabel, timeAgo } from "#app/shared/services/listings";
 import { SavedListing, isSaved, toggleSaved } from "#app/shared/services/saved";
 
 <StatusPill (status: string)>
-  <span e:if={status === "pending"} class="pill is-warning"><span class="pill-dot"></span>Pending</span>
-  <span e:elseif={status === "sold"} class="pill">Sold</span>
+  <Badge e:if={status === "pending"} variant="warning" dot>Pending</Badge>
+  <Badge e:elseif={status === "sold"} variant="secondary">Sold</Badge>
 </StatusPill>
 
 <SaveToggle (listingId: string, saved: LiveView<SavedListing>, me: string)>
-  <button type="button"
-          class={["save-toggle", isSaved(saved, listingId) && "is-active"]}
-          aria-pressed={isSaved(saved, listingId)}
-          aria-label={isSaved(saved, listingId) ? "Remove from saved" : "Save listing"}
-          onclick={() => toggleSaved(saved, listingId, me)}>
-    <svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true">
-      <path d="M12 20.5s-7.5-4.6-7.5-10.1A4.4 4.4 0 0 1 12 7.6a4.4 4.4 0 0 1 7.5 2.8c0 5.5-7.5 10.1-7.5 10.1Z" stroke-linejoin="round"/>
-    </svg>
-  </button>
+  <Toggle class="save-toggle" size="sm"
+          pressed={isSaved(saved, listingId)}
+          label="Save listing"
+          onPressedChange={(_, details) => { details.cancel(); toggleSaved(saved, listingId, me); }}>
+    <Icon name="heart" size={18} />
+  </Toggle>
 </SaveToggle>
 
 <ListingCard (listing: Listing, saved: LiveView<SavedListing>, me: string)>
