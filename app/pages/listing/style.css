@@ -118,6 +118,8 @@
   justify-content: space-between;
   gap: var(--space-3);
   font-size: var(--text-sm);
+  color: var(--ink);
+  text-decoration: none;
 }
 
 .inquiries span {
@@ -126,6 +128,10 @@
   color: var(--ink-soft);
   white-space: nowrap;
   text-overflow: ellipsis;
+}
+
+.inquiries a:hover span {
+  color: var(--ink);
 }
 
 .listing-save[data-saved] {
@@ -145,17 +151,4 @@
   .listing-info {
     position: static;
   }
-}
-
-.listing-save {
-  align-self: flex-start;
-}
-
-.inquiries a {
-  color: var(--ink);
-  text-decoration: none;
-}
-
-.inquiries a:hover span {
-  color: var(--ink);
 }

@@ -82,11 +82,8 @@
     order: 2;
     width: 100%;
     justify-content: space-between;
-    margin-inline-start: 0;
-  }
-
-  .site-nav {
     gap: 0;
+    margin-inline-start: 0;
   }
 
   .site-nav a:not(.button) {
