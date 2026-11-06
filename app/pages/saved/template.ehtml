@@ -5,6 +5,13 @@ import { ListingCard } from "#app/shared/templates/listing-card";
 import { Inbox } from "#app/shared/services/conversations";
 import { Listing, describeFilter, timeAgo } from "#app/shared/services/listings";
 import { SavedListing, SavedSearch } from "#app/shared/services/saved";
+import { Button } from "@elements/ui/button";
+import { Empty, EmptyDescription } from "@elements/ui/empty";
+import { Item, ItemActions, ItemContent, ItemDescription, ItemGroup, ItemSeparator, ItemTitle } from "@elements/ui/item";
+
+function newestSearches(searches: LiveView<SavedSearch>): SavedSearch[] {
+  return searches.sort((a, b) => +b.createdAt - +a.createdAt);
+}
 
 function savedRows(listings: LiveView<Listing>, saved: LiveView<SavedListing>): Listing[] {
   let when = new Map(saved.map((s) => [s.listingId, +s.createdAt]));
@@ -37,6 +44,20 @@ export function searchUrl(s: SavedSearch): string {
   return qs ? `/?${qs}` : "/";
 }
 
+<SearchRow (s: SavedSearch, searches: LiveView<SavedSearch>, first: boolean)>
+  <ItemSeparator e:if={!first} />
+  <Item>
+    <ItemContent>
+      <ItemTitle>{describeFilter(s)}</ItemTitle>
+      <ItemDescription>{s.lastNotifiedAt ? `Last match emailed ${timeAgo(s.lastNotifiedAt)}` : "No new matches emailed yet"}</ItemDescription>
+    </ItemContent>
+    <ItemActions>
+      <Button size="sm" href={searchUrl(s)}>See matches</Button>
+      <Button variant="ghost" size="sm" onclick={() => searches.delete(s)}>Remove</Button>
+    </ItemActions>
+  </Item>
+</SearchRow>
+
 <html lang="en" class="page-saved" (
   me: string,
   listings: LiveView<Listing>,
@@ -61,22 +82,13 @@ export function searchUrl(s: SavedSearch): string {
             <p class="hint">We email you when a neighbor posts something that matches.</p>
           </div>
 
-          <ul e:if={searches.length > 0} class="search-list">
-            <li e:for={s of searches.sort((a, b) => +b.createdAt - +a.createdAt)} class="row">
-              <div class="search-what">
-                <strong>{describeFilter(s)}</strong>
-                <span>{s.lastNotifiedAt ? `Last match emailed ${timeAgo(s.lastNotifiedAt)}` : "No new matches emailed yet"}</span>
-              </div>
-              <div class="cluster is-sm">
-                <a class="button is-sm" href={searchUrl(s)}>See matches</a>
-                <button type="button" class="is-ghost is-sm" onclick={() => searches.delete(s)}>Remove</button>
-              </div>
-            </li>
-          </ul>
+          <ItemGroup e:if={searches.length > 0} class="search-list" label="Saved searches">
+            <SearchRow e:for={s of newestSearches(searches)} {s} {searches} first={newestSearches(searches).indexOf(s) === 0} />
+          </ItemGroup>
 
-          <div e:else class="saved-empty">
-            Search or filter on the <a href="/">browse page</a>, then choose "Save search".
-          </div>
+          <Empty e:else variant="outline">
+            <EmptyDescription>Search or filter on the <a href="/">browse page</a>, then choose "Save search".</EmptyDescription>
+          </Empty>
         </section>
 
         <section class="stack is-md">
@@ -86,9 +98,7 @@ export function searchUrl(s: SavedSearch): string {
             <ListingCard e:for={listing of savedRows(listings, saved)} {listing} {saved} {me} />
           </ul>
 
-          <div e:else class="saved-empty">
-            Tap the heart on any listing to keep it here.
-          </div>
+          <Empty e:else variant="outline" description="Tap the heart on any listing to keep it here." />
         </section>
       </main>
     </div>

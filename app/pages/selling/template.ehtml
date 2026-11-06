@@ -3,6 +3,16 @@ import { LiveView } from "@elements/app";
 import { SiteHeader } from "#app/shared/templates/site-header";
 import { Inbox } from "#app/shared/services/conversations";
 import { Listing, Status, formatPrice, timeAgo, setStatus } from "#app/shared/services/listings";
+import { Button } from "@elements/ui/button";
+import { Empty } from "@elements/ui/empty";
+import { Item, ItemActions, ItemContent, ItemDescription, ItemGroup, ItemMedia, ItemSeparator, ItemTitle } from "@elements/ui/item";
+import { NativeSelect } from "@elements/ui/native-select";
+
+const STATUS_OPTIONS = [
+  { value: "available", label: "Available" },
+  { value: "pending", label: "Pending" },
+  { value: "sold", label: "Sold" },
+];
 
 function newestFirst(listings: LiveView<Listing>): Listing[] {
   return listings.sort((a, b) => +b.createdAt - +a.createdAt);
@@ -16,21 +26,22 @@ function plural(n: number, word: string): string {
   return `${n} ${word}${n === 1 ? "" : "s"}`;
 }
 
-<MyListing (listing: Listing, view: LiveView<Listing>, inbox: Inbox)>
-  <li class={["my-listing", listing.status === "sold" && "is-sold"]}>
-    <img src={listing.coverPhoto ?? ""} alt="" width="80" height="60">
-    <div class="my-listing-text">
-      <a href={`/listings/${listing.id}`}>{listing.title}</a>
-      <span>{formatPrice(listing.price)} · posted {timeAgo(listing.createdAt)} · {plural(inquiryCount(inbox, listing.id), "conversation")}</span>
-    </div>
-    <select value={listing.status}
-            aria-label={`Status of ${listing.title}`}
-            onchange={(e) => setStatus(view, listing, (e.target as HTMLSelectElement).value as Status)}>
-      <option value="available">Available</option>
-      <option value="pending">Pending</option>
-      <option value="sold">Sold</option>
-    </select>
-  </li>
+<MyListing (listing: Listing, view: LiveView<Listing>, inbox: Inbox, first: boolean)>
+  <ItemSeparator e:if={!first} />
+  <Item class={["my-listing", listing.status === "sold" && "is-sold"].filter(Boolean).join(" ")}>
+    <ItemMedia><img src={listing.coverPhoto ?? ""} alt="" width="80" height="60"></ItemMedia>
+    <ItemContent>
+      <ItemTitle><a href={`/listings/${listing.id}`}>{listing.title}</a></ItemTitle>
+      <ItemDescription>{formatPrice(listing.price)} · posted {timeAgo(listing.createdAt)} · {plural(inquiryCount(inbox, listing.id), "conversation")}</ItemDescription>
+    </ItemContent>
+    <ItemActions>
+      <NativeSelect value={listing.status}
+                    size="sm"
+                    options={STATUS_OPTIONS}
+                    attrs={{ "aria-label": `Status of ${listing.title}` }}
+                    onchange={(e) => setStatus(view, listing, (e.target as HTMLSelectElement).value as Status)} />
+    </ItemActions>
+  </Item>
 </MyListing>
 
 <html lang="en" class="page-selling" (listings: LiveView<Listing>, inbox: Inbox)>
@@ -45,16 +56,15 @@ function plural(n: number, word: string): string {
       <main class="app-main page-shell is-form selling stack is-lg">
         <div class="selling-head row">
           <h1>Your listings</h1>
-          <a class="button is-primary" href="/sell">Post a listing</a>
+          <Button variant="primary" href="/sell">Post a listing</Button>
         </div>
 
-        <ul e:if={listings.length > 0} class="my-listings">
-          <MyListing e:for={listing of newestFirst(listings)} {listing} view={listings} {inbox} />
-        </ul>
+        <ItemGroup e:if={listings.length > 0} class="my-listings" label="Your listings">
+          <MyListing e:for={listing of newestFirst(listings)} {listing} view={listings} {inbox} first={newestFirst(listings).indexOf(listing) === 0} />
+        </ItemGroup>
 
-        <div e:else class="selling-empty stack is-sm">
-          <strong>Nothing listed yet.</strong>
-          <p>Post something you no longer need. Free things go fast.</p>
+        <div e:else>
+          <Empty variant="outline" title="Nothing listed yet." description="Post something you no longer need. Free things go fast." />
         </div>
       </main>
     </div>
